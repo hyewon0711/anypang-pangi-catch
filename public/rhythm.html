@@ -87,7 +87,8 @@
   /* 접근 링 (타이밍 가이드) */
   .ring{position:absolute;left:50%;top:50%;width:100%;height:100%;border-radius:50%;border:4px solid var(--cyan);transform:translate(-50%,-50%) scale(2);opacity:0;pointer-events:none;z-index:6;}
   .ring.show{opacity:.9;}
-  .ring.perfectzone{border-color:var(--gold);}
+  .ring.next{border-width:5px;box-shadow:0 0 10px rgba(70,209,209,.6);}
+  .ring.perfectzone{border-color:var(--gold);box-shadow:0 0 14px rgba(255,206,74,.8);}
 
   /* 팡이 */
   .pangi-stack{position:absolute;bottom:-110%;display:flex;transition:bottom .18s cubic-bezier(.34,1.56,.64,1);padding-bottom:8%;z-index:4;}
@@ -201,7 +202,8 @@ const BEAT = 60 / BPM;          // 0.5s
 const LEAD = 0.95;              // 팡이가 올라온 뒤 타격 지점까지 걸리는 시간(s)
 const W_PERFECT = 0.085;        // ±0.085s = PERFECT
 const W_GOOD    = 0.18;         // ±0.18s = GOOD (그 밖은 MISS)
-const SCORE = { perfect:300, good:100, extra:150 };
+const MULTI_GAP_BEAT = 0.5;     // 연타 팡이 간격(박) — 0.5 = 반 박마다 "탁-탁-탁"
+const SCORE = { perfect:300, good:100 };
 
 /* 팡이 색(칸 위치별 고정 — 시각적 다양성) */
 function colorFor(hole){ return ['white','black','gold','black','gold','white','gold','white','black'][hole]; }
@@ -343,13 +345,19 @@ function buildGrid(){
 function beginSong(){
   // 노트 인스턴스 생성 (절대 시각 계산)
   songStart = actx.currentTime + 0.1;
-  notes = CHART.map((n,idx)=>({
-    id:idx, hole:n.hole??n.h, count:n.c||1,
-    tapTime: songStart + (n.b)*BEAT,
-    appearTime: songStart + (n.b)*BEAT - LEAD,
-    spawned:false, done:false, remaining:n.c||1, started:false,
-    el:null, stackEl:null, ringEl:null,
-  }));
+  const GAP = MULTI_GAP_BEAT * BEAT; // 연타 간격(초)
+  notes = CHART.map((n,idx)=>{
+    const hole = n.hole??n.h, count = n.c||1;
+    const base = songStart + n.b*BEAT;
+    // 팡이 마리당 hit 1개 — 각자 자기 타격시각(연타 간격만큼 시차)을 가짐
+    const hits = [];
+    for(let k=0;k<count;k++) hits.push({ time: base + k*GAP, done:false, ring:null, pangi:null });
+    return {
+      id:idx, hole, count, hits,
+      appearTime: base - LEAD,         // 첫 hit 기준 등장
+      spawned:false, done:false, el:null, stackEl:null,
+    };
+  });
   totalTaps = notes.reduce((s,n)=>s+n.count,0);
   // 오디오 스케줄러 시작
   nextBeat=0; scheduleAudio(); schedulerId=setInterval(scheduleAudio,25);
@@ -364,13 +372,22 @@ function loop(){
     // 등장
     if(!n.spawned && now>=n.appearTime){ spawnNote(n); }
     if(n.spawned){
-      // 접근 링 스케일: 등장(2.0) → 타격시각(1.0)
-      const prog = Math.min(1.5, (now - n.appearTime) / LEAD);
-      const scale = 1 + Math.max(0, 1-prog); // prog 0→scale2, prog1→scale1
-      n.ringEl.style.transform = `translate(-50%,-50%) scale(${scale})`;
-      if(Math.abs(now-n.tapTime) <= W_PERFECT) n.ringEl.classList.add('perfectzone');
-      // 윈도우 초과 → 남은 팡이 MISS 처리
-      if(now > n.tapTime + W_GOOD){ failNote(n); }
+      // 다음에 칠 hit(가장 이른 미처리) 찾기
+      let nextIdx=-1;
+      for(let k=0;k<n.hits.length;k++){ if(!n.hits[k].done){ nextIdx=k; break; } }
+      // 각 hit의 링을 자기 타격시각 기준으로 축소
+      for(let k=0;k<n.hits.length;k++){
+        const h=n.hits[k]; if(h.done||!h.ring) continue;
+        const scale = 1 + Math.max(0, Math.min(1.7, (h.time - now)/LEAD)); // 자기 시각(1.0)으로 수렴
+        h.ring.style.transform = `translate(-50%,-50%) scale(${scale})`;
+        const isNext = (k===nextIdx);
+        h.ring.style.opacity = isNext ? '0.95' : '0.35'; // 다음 칠 링만 선명
+        h.ring.classList.toggle('next', isNext);
+        h.ring.classList.toggle('perfectzone', isNext && Math.abs(now-h.time)<=W_PERFECT);
+        // 자기 윈도우 초과 → 그 팡이만 MISS (체력 감소 없음)
+        if(now > h.time + W_GOOD){ missHit(n,h); }
+      }
+      if(n.hits.every(h=>h.done)) clearNote(n);
     }
   }
   // 진행바
@@ -385,67 +402,71 @@ function spawnNote(n){
   n.spawned=true;
   const hole=document.querySelector(`.hole[data-i="${n.hole}"]`);
   const clip=hole.querySelector('.clip');
+  // 팡이 마리 수만큼 생성 (앞쪽 = 먼저 칠 팡이)
   const stack=document.createElement('div'); stack.className='pangi-stack';
-  for(let k=0;k<n.count;k++){ const p=document.createElement('div'); p.className='pangi '+colorFor(n.hole); p.innerHTML='<div class="eye l"></div><div class="eye r"></div>'; stack.appendChild(p); }
+  for(let k=0;k<n.count;k++){
+    const p=document.createElement('div'); p.className='pangi '+colorFor(n.hole);
+    p.innerHTML='<div class="eye l"></div><div class="eye r"></div>';
+    stack.appendChild(p); n.hits[k].pangi=p;
+  }
   clip.appendChild(stack);
-  const ring=document.createElement('div'); ring.className='ring show'; hole.appendChild(ring);
-  n.stackEl=stack; n.ringEl=ring; n.el=hole;
+  // 팡이 마리 수만큼 링 생성 — 각자 자기 타격시각에 닫힘(연타 타이밍 가이드)
+  for(let k=0;k<n.count;k++){
+    const ring=document.createElement('div'); ring.className='ring show'; hole.appendChild(ring);
+    n.hits[k].ring=ring;
+  }
+  n.stackEl=stack; n.el=hole;
   requestAnimationFrame(()=>stack.classList.add('up'));
 }
 
 function onTap(hole){
   if(!playing) return;
   const now=actx.currentTime;
-  // 해당 칸의 처리 가능한 노트 중 타격시각이 가장 가까운 것
-  let target=null, bestDiff=Infinity;
+  // 해당 칸에서 '다음에 칠 hit'들 중 타격시각이 가장 가까운 것
+  let tNote=null, tHit=null, bestDiff=Infinity;
   for(const n of notes){
     if(n.done || !n.spawned || n.hole!==hole) continue;
-    if(now < n.tapTime - W_GOOD) continue;   // 아직 너무 이름
-    const diff=Math.abs(now-n.tapTime);
-    if(diff<bestDiff){ bestDiff=diff; target=n; }
+    let h=null; for(const hh of n.hits){ if(!hh.done){ h=hh; break; } } // 가장 이른 미처리 hit
+    if(!h) continue;
+    if(now < h.time - W_GOOD) continue;     // 아직 너무 이름
+    const diff=Math.abs(now-h.time);
+    if(diff<bestDiff){ bestDiff=diff; tNote=n; tHit=h; }
   }
-  if(!target) return; // 빈 칸/타이밍 밖 터치는 무시(체력 감소 없음)
+  if(!tHit) return; // 타이밍 밖 터치 무시(체력 감소 없음)
 
-  // 첫 터치면 타이밍 판정, 이후 연타는 보너스
-  const isFirst = !target.started;
-  target.started=true;
-  let judge;
-  if(isFirst){
-    judge = bestDiff<=W_PERFECT ? 'perfect' : 'good';
-  } else {
-    judge = 'extra';
-  }
-  applyHit(target, judge);
-  // 팡이 한 마리 제거
-  target.remaining--;
-  const last=target.stackEl.querySelector('.pangi'); if(last) last.remove();
-  if(target.el){ target.el.classList.remove('flash'); void target.el.offsetWidth; target.el.classList.add('flash'); }
+  const judge = bestDiff<=W_PERFECT ? 'perfect' : 'good';
+  applyHit(tNote, judge);
+  resolveHit(tHit); // 그 링·팡이 제거
+  if(tNote.el){ tNote.el.classList.remove('flash'); void tNote.el.offsetWidth; tNote.el.classList.add('flash'); }
   hitPing();
-  if(target.remaining<=0){ clearNote(target, true); }
+  if(tNote.hits.every(h=>h.done)) clearNote(tNote);
 }
 
 function applyHit(n, judge){
   if(judge==='perfect'){ score+=SCORE.perfect; cPerfect++; combo++; popJudge(n,'PERFECT','perfect'); }
-  else if(judge==='good'){ score+=SCORE.good; cGood++; combo++; popJudge(n,'GOOD','good'); }
-  else { score+=SCORE.extra; combo++; popJudge(n,'+'+SCORE.extra,'good'); } // 연타 보너스
-  // 콤보 보너스
-  score += Math.floor(combo/10)*5;
+  else { score+=SCORE.good; cGood++; combo++; popJudge(n,'GOOD','good'); }
+  score += Math.floor(combo/10)*5; // 콤보 보너스
   maxCombo=Math.max(maxCombo,combo);
   updateHUD();
 }
 
-function failNote(n){
-  // 윈도우 내 안 친 팡이 수만큼 MISS (체력 감소 없음, 콤보만 끊김)
-  const missed=n.remaining;
-  if(missed>0){ cMiss+=missed; combo=0; popJudge(n,'MISS','miss'); missThud(); }
-  clearNote(n, false);
-  updateHUD();
+function missHit(n,h){
+  if(h.done) return;
+  cMiss++; combo=0; popJudge(n,'MISS','miss'); missThud();
+  resolveHit(h); updateHUD();
 }
 
-function clearNote(n, success){
+function resolveHit(h){
+  h.done=true;
+  if(h.ring){ h.ring.remove(); h.ring=null; }
+  if(h.pangi){ h.pangi.remove(); h.pangi=null; }
+}
+
+function clearNote(n){
+  if(n.done) return;
   n.done=true;
-  if(n.ringEl) n.ringEl.remove();
-  if(n.stackEl){ n.stackEl.classList.remove('up'); n.stackEl.classList.add('retract'); const s=n.stackEl; setTimeout(()=>s.remove(),200); }
+  for(const h of n.hits){ if(h.ring){ h.ring.remove(); h.ring=null; } }
+  if(n.stackEl){ const s=n.stackEl; s.classList.remove('up'); s.classList.add('retract'); setTimeout(()=>s.remove(),200); n.stackEl=null; }
 }
 
 function popJudge(n,text,cls){
@@ -513,7 +534,7 @@ function openHelp(){
     <div class="help-step"><div class="n">1</div><div class="txt"><b>노래 박자</b>에 맞춰 9개 칸에서 팡이가 순서대로 튀어나와요.</div></div>
     <div class="help-step"><div class="n">2</div><div class="txt">팡이를 감싸는 <b>파란 링</b>이 점점 줄어들어요. 링이 팡이 크기에 <b>딱 맞는 순간</b> 터치하면 <b style="color:#ffce4a">PERFECT</b>!</div></div>
     <div class="help-step"><div class="n">3</div><div class="txt">타이밍이 살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. 단, <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
-    <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b> 나오면, 나온 수만큼 <b>연달아 터치</b>하세요!</div></div>
+    <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b> 나오면 <b>링도 마리 수만큼</b> 나와요. 링이 <b>차례로 닫히는 순서</b>대로 탁-탁-탁 연달아 터치! (다음 칠 링이 가장 선명해요)</div></div>
     <div class="help-step"><div class="n">5</div><div class="txt">콤보를 길게 이어갈수록 보너스 점수 UP. 최종 점수와 등급이 <b>리듬 랭킹</b>에 반영돼요.</div></div>
     <div class="btn-row"><button class="btn primary" onclick="document.getElementById('helpOverlay').remove()">확인</button></div>
   </div>`;
