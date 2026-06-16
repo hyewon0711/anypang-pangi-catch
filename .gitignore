@@ -1,6 +1,10 @@
 # 런타임 데이터 (플레이어 점수 — 커밋 제외)
 scores.json
 
+# 실제 음원 파일 (저작권 — 커밋 제외, README는 유지)
+public/songs/*
+!public/songs/README.md
+
 # 의존성 (현재 무의존성이라 비어있지만 향후 대비)
 node_modules/
 

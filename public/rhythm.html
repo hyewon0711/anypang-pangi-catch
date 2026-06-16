@@ -25,28 +25,47 @@
   .logo .note{display:inline-block;animation:bounce 1s ease-in-out infinite;}
   @keyframes bounce{50%{transform:translateY(-8px)}}
   .sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
-  .song-card{width:100%;max-width:320px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:18px;padding:18px;margin-bottom:18px;border:1px solid rgba(255,255,255,.12);}
-  .song-card .cover{font-size:46px;margin-bottom:8px;}
-  .song-card .name{font-size:20px;font-weight:900;}
-  .song-card .meta{font-size:12px;color:var(--muted);margin-top:4px;}
+  .pangi-demo{display:flex;gap:14px;margin-bottom:26px;}
+  .demo-dot{width:50px;height:50px;border-radius:50%;position:relative;animation:wob 1.4s ease-in-out infinite;}
+  .demo-dot:nth-child(2){animation-delay:.2s}.demo-dot:nth-child(3){animation-delay:.4s}
+  .demo-dot.white{background:radial-gradient(circle at 38% 30%,#fff,#9a90bb);}
+  .demo-dot.black{background:radial-gradient(circle at 38% 30%,#5a5070,#100b1c);}
+  .demo-dot.gold{background:radial-gradient(circle at 38% 30%,#fff3c0,#e08a18);box-shadow:0 0 14px rgba(255,206,74,.6);}
+  .demo-dot .e{position:absolute;top:34%;width:10px;height:12px;background:#fff;border-radius:50%;}
+  .demo-dot .e.l{left:26%}.demo-dot .e.r{right:26%}
+  .demo-dot .e::after{content:'';position:absolute;top:32%;left:28%;width:4px;height:5px;background:#111;border-radius:50%;}
   .nick-input{width:100%;max-width:320px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;font-size:17px;text-align:center;font-weight:700;margin-bottom:14px;}
   .nick-input:focus{outline:none;border-color:var(--gold);}
   .lobby-links{margin-top:18px;display:flex;gap:14px;font-size:13px;}
   .lobby-links a{color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--muted);}
 
   /* ===== 헤더 ===== */
-  .topbar{padding:14px 16px 6px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar{padding:14px 16px 4px;display:flex;align-items:center;justify-content:space-between;}
   .title{font-size:19px;font-weight:900;text-shadow:0 3px 0 #2d4d9c;display:flex;gap:6px;align-items:center;}
   .me-chip{background:var(--panel2);padding:6px 12px;border-radius:20px;font-size:12px;color:var(--muted);}
   .me-chip b{color:#fff;}
   .help-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);font-weight:900;font-size:17px;box-shadow:0 3px 0 #b86a12;}
 
+  /* ===== 선택 UI (곡/난이도) ===== */
+  .selectors{padding:2px 16px 0;}
+  .sel-label{font-size:11px;color:var(--muted);font-weight:700;margin:8px 2px 5px;}
+  .song-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;}
+  .chip{flex:0 0 auto;min-width:82px;background:var(--panel);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;text-align:center;cursor:pointer;transition:.12s;}
+  .chip.sel{border-color:var(--gold);background:linear-gradient(180deg,#3a4a8a,#26346a);box-shadow:0 0 12px rgba(255,206,74,.35);}
+  .chip .c{font-size:22px;line-height:1;}
+  .chip .n{font-size:11px;font-weight:700;margin-top:3px;white-space:nowrap;}
+  .chip.add{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);border-style:dashed;}
+  .diff-row{display:flex;gap:8px;}
+  .diff-btn{flex:1;padding:9px 0;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:var(--panel);color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:.12s;}
+  .diff-btn .s{display:block;font-size:10px;color:var(--gold);margin-top:1px;}
+  .diff-btn.sel{border-color:var(--gold);background:linear-gradient(180deg,#3a4a8a,#26346a);}
+
   /* ===== 홈 랭킹 ===== */
-  .home-best{margin:6px 16px 10px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:16px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,.1);}
-  .home-best .lbl{font-size:12px;color:var(--muted);}
-  .home-best .v{font-size:30px;font-weight:900;color:var(--gold);}
-  .home-best .rk{font-size:13px;margin-top:2px;}
-  .rank-wrap{flex:1;margin:0 16px;background:var(--panel2);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);}
+  .home-best{margin:8px 16px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:14px;padding:10px 14px;font-size:13px;border:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;}
+  .home-best .sel-info{color:#fff;font-weight:800;}
+  .home-best .best-info{color:var(--muted);}
+  .home-best .best-info b{color:var(--gold);font-size:16px;}
+  .rank-wrap{flex:1;margin:0 16px;background:var(--panel2);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);min-height:120px;}
   .rank-head{padding:10px 14px;font-size:13px;font-weight:800;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;}
   .rank-list{flex:1;overflow-y:auto;}
   .rank-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
@@ -58,6 +77,7 @@
   .nick{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .score{font-weight:900;font-variant-numeric:tabular-nums;}
   .reward{font-size:16px;width:22px;text-align:center;}
+  .empty{padding:28px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5;}
   .play-area{padding:12px 16px 18px;display:flex;gap:10px;}
   .play-btn{flex:1;padding:16px;border:none;border-radius:18px;cursor:pointer;background:linear-gradient(180deg,#ffd76b,var(--gold2));color:var(--ink);font-size:18px;font-weight:900;box-shadow:0 5px 0 #b86a12;}
   .play-btn:active{transform:translateY(4px);box-shadow:none;}
@@ -125,6 +145,8 @@
   @keyframes pulse{50%{opacity:.5}}
   .btn-row{display:flex;gap:10px;margin-top:6px;}
   .btn-row .btn{flex:1;}
+  .fld{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:8px 0;color:#e6ecff;}
+  .fld input{width:110px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;text-align:center;font-size:14px;}
   .help-step{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start;}
   .help-step .n{width:25px;height:25px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px;}
   .help-step .txt{font-size:13px;line-height:1.5;color:#e6ecff;}
@@ -140,19 +162,17 @@
   <div class="screen" id="lobby">
     <div class="logo">🎵 팡이 리듬<span class="note">♪</span></div>
     <div class="sub">노래 박자에 맞춰 팡이를 터치하세요</div>
-    <div class="song-card">
-      <div class="cover">🎶</div>
-      <div class="name">팡이 비트</div>
-      <div class="meta">BPM 120 · ★★☆ · 약 35초</div>
+    <div class="pangi-demo">
+      <div class="demo-dot white"><div class="e l"></div><div class="e r"></div></div>
+      <div class="demo-dot black"><div class="e l"></div><div class="e r"></div></div>
+      <div class="demo-dot gold"><div class="e l"></div><div class="e r"></div></div>
     </div>
     <input class="nick-input" id="nickInput" maxlength="12" placeholder="닉네임을 입력하세요" autocomplete="off">
     <button class="btn primary" style="width:100%;max-width:320px;" onclick="enter()">입장하기 ▶</button>
-    <div class="lobby-links">
-      <a href="/">🕳️ 팡이 잡기 모드</a>
-    </div>
+    <div class="lobby-links"><a href="/">🕳️ 팡이 잡기 모드</a></div>
   </div>
 
-  <!-- ===== 홈 (랭킹) ===== -->
+  <!-- ===== 홈 ===== -->
   <div class="screen hidden" id="home">
     <div class="topbar">
       <div class="title">🎵 팡이 리듬</div>
@@ -161,15 +181,24 @@
         <button class="help-btn" onclick="openHelp()">?</button>
       </div>
     </div>
+
+    <div class="selectors">
+      <div class="sel-label">🎼 곡 선택</div>
+      <div class="song-chips" id="songChips"></div>
+      <div class="sel-label">🎚️ 난이도</div>
+      <div class="diff-row" id="diffRow"></div>
+    </div>
+
     <div class="home-best">
-      <div class="lbl">내 최고 점수 · 팡이 비트</div>
-      <div class="v" id="myBest">0</div>
-      <div class="rk" id="myRankLine">랭킹에 도전해보세요!</div>
+      <span class="sel-info" id="selInfo">팡이 비트 · 보통</span>
+      <span class="best-info" id="bestInfo">내 최고 <b id="myBest">0</b> <span id="myRankLine"></span></span>
     </div>
+
     <div class="rank-wrap">
-      <div class="rank-head"><span>🏆 리듬 랭킹</span><span id="totalPlayers">0명 참가</span></div>
-      <div class="rank-list" id="rankList"><div style="padding:30px;text-align:center;color:var(--muted)">불러오는 중...</div></div>
+      <div class="rank-head"><span>🏆 랭킹</span><span id="totalPlayers">0명 참가</span></div>
+      <div class="rank-list" id="rankList"><div class="empty">불러오는 중...</div></div>
     </div>
+
     <div class="play-area">
       <button class="play-btn" onclick="startGame()">🎵 플레이 시작</button>
       <button class="refresh-btn" onclick="loadLeaderboard()" title="새로고침">🔄</button>
@@ -183,101 +212,139 @@
       <div class="hud-r"><div class="combo"><span id="comboNum">0</span><small> COMBO</small></div></div>
     </div>
     <div class="progress"><div class="bar" id="progressBar"></div></div>
-    <div class="song-name-mini">🎶 팡이 비트</div>
+    <div class="song-name-mini" id="gameSong">🎶 팡이 비트</div>
     <div class="grid-wrap"><div class="grid" id="grid"></div></div>
     <div class="countdown hidden" id="countdown"></div>
   </div>
 
 </div>
+<input type="file" id="fileInput" accept="audio/*" hidden>
 <div class="toast" id="toast"></div>
 
 <script>
 /* ========================================================================
    상태 / 설정
 ======================================================================== */
-let me = { nickname:'', best:0 };
-const MODE = 'rhythm';
-const BPM = 120;
-const BEAT = 60 / BPM;          // 0.5s
-const LEAD = 0.95;              // 팡이가 올라온 뒤 타격 지점까지 걸리는 시간(s)
+let me = { nickname:'' };
+const LEAD = 0.95;              // 팡이 등장 후 타격 지점까지(s)
 const W_PERFECT = 0.085;        // ±0.085s = PERFECT
 const W_GOOD    = 0.18;         // ±0.18s = GOOD (그 밖은 MISS)
-const MULTI_GAP_BEAT = 0.5;     // 연타 팡이 간격(박) — 0.5 = 반 박마다 "탁-탁-탁"
+const MULTI_GAP_BEAT = 0.5;     // 연타 팡이 간격(박)
 const SCORE = { perfect:300, good:100 };
 
-/* 팡이 색(칸 위치별 고정 — 시각적 다양성) */
-function colorFor(hole){ return ['white','black','gold','black','gold','white','gold','white','black'][hole]; }
-
 /* ------------------------------------------------------------------------
-   채보(Chart): "팡이 비트" — 박자(beat) 단위로 노트 정의
-   {b: 박자, h: 칸(0~8), c: 팡이 수(연타)}
-   같은 칸은 충분히 간격을 둬 겹치지 않게 배치.
+   곡 목록
+   - kind:'synth'  → WebAudio로 즉석 생성하는 내장곡(파일 불필요)
+   - kind:'file'   → 실제 음원. src(서버 경로) 또는 buffer(유저 업로드)
+   실제 mp3를 추가하려면 public/songs/에 파일을 넣고 아래에 한 줄 추가:
+     { id:'mysong', name:'곡이름', cover:'🎵', kind:'file', src:'songs/mysong.mp3',
+       bpm:128, offset:0, lengthBeats:120, ranked:true }
 ------------------------------------------------------------------------ */
-const CHART = [
-  // 인트로 (4박마다 한 칸씩, 여유롭게)
-  {b:4,h:4},{b:6,h:1},{b:8,h:7},{b:10,h:3},{b:12,h:5},{b:14,h:4},
-  // 빌드업 (2박 간격으로 이동)
-  {b:16,h:0},{b:18,h:2},{b:20,h:8},{b:22,h:6},{b:24,h:1},{b:26,h:7},
-  // 1절 (매 박, 칸 이동)
-  {b:28,h:3},{b:29,h:5},{b:30,h:0},{b:31,h:8},
-  {b:32,h:1},{b:33,h:7},{b:34,h:2},{b:35,h:6},
-  // 연타 등장 (한 칸 2~3마리)
-  {b:37,h:4,c:2},{b:39,h:0},{b:40,h:8},{b:41,h:4,c:3},
-  {b:43,h:2},{b:44,h:6},{b:45,h:1,c:2},
-  // 클라이맥스 (엇박 + 빠른 이동)
-  {b:48,h:3},{b:48.5,h:5},{b:49,h:1},{b:49.5,h:7},
-  {b:50,h:0},{b:50.5,h:2},{b:51,h:6},{b:51.5,h:8},
-  {b:52,h:4,c:3},{b:54,h:1,c:2},{b:55,h:7,c:2},
-  // 마무리
-  {b:57,h:3},{b:58,h:5},{b:59,h:4},{b:61,h:4,c:2},
+const SONGS = [
+  { id:'pangibeat', name:'팡이 비트', cover:'🎶', kind:'synth', bpm:120, offset:0, lengthBeats:64, ranked:true },
+  // 예시(파일을 넣으면 활성화):
+  // { id:'demo', name:'데모곡', cover:'🎵', kind:'file', src:'songs/demo.mp3', bpm:128, offset:0, lengthBeats:140, ranked:true },
 ];
-const LAST_BEAT = Math.max(...CHART.map(n => n.b)) + 2;
 
-/* 배경 멜로디(펜타토닉) — 박자마다 순환 */
+/* 난이도 프리셋 — 곡 길이에 맞춰 채보를 결정론적으로 생성 */
+const DIFFICULTIES = {
+  easy:   { label:'쉬움',   stars:'★☆☆', step:2, multiChance:0,    maxMulti:1, eighthChance:0 },
+  normal: { label:'보통',   stars:'★★☆', step:1, multiChance:0.18, maxMulti:2, eighthChance:0.12 },
+  hard:   { label:'어려움', stars:'★★★', step:1, multiChance:0.32, maxMulti:3, eighthChance:0.45 },
+};
+
+let curSong = SONGS[0];
+let curDiff = 'normal';
+let BEAT = 60 / curSong.bpm;
+
+function colorFor(hole){ return ['white','black','gold','black','gold','white','gold','white','black'][hole]; }
+function modeKey(){ return `rhythm:${curSong.id}:${curDiff}`; }
+
+/* 결정론적 의사난수 (같은 곡·난이도는 항상 같은 채보) */
+function hash01(i){ const x=Math.sin(i*12.9898+78.233)*43758.5453; return x-Math.floor(x); }
+
+/* 채보 생성 */
+function genChart(lengthBeats, diffKey){
+  const D = DIFFICULTIES[diffKey];
+  const chart=[]; const lastHoleBeat={}; const MIN_GAP=3; let seed=0;
+  const pickHole=(beat, base)=>{
+    let hole=Math.floor(hash01(base)*9)%9, guard=0;
+    while(guard<9 && lastHoleBeat[hole]!==undefined && (beat-lastHoleBeat[hole])<MIN_GAP){ hole=(hole+1)%9; guard++; }
+    lastHoleBeat[hole]=beat; return hole;
+  };
+  for(let b=4; b<=lengthBeats-2; b+=D.step){
+    seed++;
+    const hole=pickHole(b, seed*1.7);
+    let c=1;
+    if(hash01(seed*3.3) < D.multiChance){ c = (D.maxMulti>=3 && hash01(seed*5.1)<0.4) ? 3 : 2; }
+    chart.push({b, h:hole, c});
+    // 어려움: 엇박(반 박) 노트 추가
+    if(D.eighthChance>0 && hash01(seed*7.7)<D.eighthChance){
+      const h2=pickHole(b+0.5, seed*9.2+1);
+      chart.push({b:b+0.5, h:h2, c:1});
+    }
+  }
+  return chart;
+}
+
 const MELODY = [523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33];
 
 /* ========================================================================
-   WebAudio — 곡 생성 + 효과음
+   WebAudio
 ======================================================================== */
-let actx, masterGain, noiseBuf;
+let actx, masterGain, noiseBuf, musicSource=null;
 function initAudio(){
   if(actx) return;
   actx = new (window.AudioContext||window.webkitAudioContext)();
   masterGain = actx.createGain(); masterGain.gain.value = 0.6; masterGain.connect(actx.destination);
-  // 노이즈 버퍼(드럼용)
   noiseBuf = actx.createBuffer(1, actx.sampleRate*0.3, actx.sampleRate);
   const d = noiseBuf.getChannelData(0);
   for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
 }
-function env(gain, t, a, peak, d){ gain.setValueAtTime(0,t); gain.linearRampToValueAtTime(peak,t+a); gain.exponentialRampToValueAtTime(0.0001,t+a+d); }
+function env(gain,t,a,peak,d){ gain.setValueAtTime(0,t); gain.linearRampToValueAtTime(peak,t+a); gain.exponentialRampToValueAtTime(0.0001,t+a+d); }
 function kick(t){ const o=actx.createOscillator(),g=actx.createGain(); o.connect(g);g.connect(masterGain); o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12); env(g.gain,t,0.001,0.9,0.18); o.start(t);o.stop(t+0.2); }
 function snare(t){ const n=actx.createBufferSource();n.buffer=noiseBuf; const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=1200; const g=actx.createGain(); n.connect(f);f.connect(g);g.connect(masterGain); env(g.gain,t,0.001,0.35,0.14); n.start(t);n.stop(t+0.16); }
 function hat(t){ const n=actx.createBufferSource();n.buffer=noiseBuf; const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=7000; const g=actx.createGain(); n.connect(f);f.connect(g);g.connect(masterGain); env(g.gain,t,0.001,0.12,0.04); n.start(t);n.stop(t+0.05); }
 function tone(t,freq,peak,dur,type){ const o=actx.createOscillator(),g=actx.createGain(); o.type=type||'triangle';o.frequency.value=freq; o.connect(g);g.connect(masterGain); env(g.gain,t,0.005,peak,dur); o.start(t);o.stop(t+dur+0.05); }
-function hitPing(){ if(!actx)return; const t=actx.currentTime; tone(t,1320,0.25,0.12,'square'); }
-function missThud(){ if(!actx)return; const t=actx.currentTime; tone(t,160,0.2,0.12,'sawtooth'); }
+function hitPing(){ if(!actx)return; tone(actx.currentTime,1320,0.25,0.12,'square'); }
+function missThud(){ if(!actx)return; tone(actx.currentTime,160,0.2,0.12,'sawtooth'); }
 
-/* 곡 스케줄러 (lookahead) */
+/* 내장곡 합성 스케줄러 */
 let songStart=0, nextBeat=0, schedulerId=null;
 function scheduleAudio(){
   const ahead = actx.currentTime + 0.12;
   while(songStart + nextBeat*BEAT < ahead){
     const t = songStart + nextBeat*BEAT;
     const ib = Math.round(nextBeat);
-    const isInt = Math.abs(nextBeat - ib) < 0.01;
-    if(isInt){
-      kick(t);                                  // 4-on-the-floor
-      if(ib % 2 === 1) snare(t);                // 스네어 2,4박
-      tone(t, MELODY[ib % MELODY.length], 0.14, 0.32, 'triangle'); // 멜로디
-      if(ib % 4 === 0) tone(t, MELODY[ib%MELODY.length]/2, 0.16, 0.45, 'sine'); // 베이스
+    if(Math.abs(nextBeat - ib) < 0.01){
+      kick(t);
+      if(ib % 2 === 1) snare(t);
+      tone(t, MELODY[ib % MELODY.length], 0.14, 0.32, 'triangle');
+      if(ib % 4 === 0) tone(t, MELODY[ib%MELODY.length]/2, 0.16, 0.45, 'sine');
     }
-    hat(t);                                     // 하이햇 매 반박
+    hat(t);
     nextBeat += 0.5;
   }
 }
 
+/* 음악 시작/정지 — 게임 시계(songStart)를 음악 시작에 맞춤 */
+function startMusic(){
+  if(curSong.kind==='file' && curSong.buffer){
+    const src=actx.createBufferSource(); src.buffer=curSong.buffer; src.connect(masterGain);
+    const at=actx.currentTime+0.15; src.start(at); musicSource=src;
+    songStart = at + (curSong.offset||0);
+  } else { // synth
+    songStart = actx.currentTime + 0.15;
+    nextBeat=0; scheduleAudio(); schedulerId=setInterval(scheduleAudio,25);
+  }
+}
+function stopMusic(){
+  if(schedulerId){ clearInterval(schedulerId); schedulerId=null; }
+  if(musicSource){ try{ musicSource.stop(); }catch(e){} musicSource=null; }
+}
+
 /* ========================================================================
-   입장 / 랭킹
+   입장 / 선택 UI / 랭킹
 ======================================================================== */
 function enter(){
   const v=document.getElementById('nickInput').value.trim();
@@ -286,22 +353,48 @@ function enter(){
   localStorage.setItem('pangi_nick',v);
   document.getElementById('lobby').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
-  loadLeaderboard();
+  renderSongChips(); renderDiffRow(); updateSelInfo(); loadLeaderboard();
 }
 document.getElementById('nickInput').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
 const saved=localStorage.getItem('pangi_nick'); if(saved) document.getElementById('nickInput').value=saved;
 
+function renderSongChips(){
+  const el=document.getElementById('songChips');
+  el.innerHTML = SONGS.map(s=>`<div class="chip ${s.id===curSong.id?'sel':''}" data-sid="${s.id}">
+      <div class="c">${s.cover}</div><div class="n">${escapeHtml(s.name)}</div></div>`).join('')
+    + `<div class="chip add" id="addChip"><div class="c">＋</div><div class="n">내 MP3</div></div>`;
+  el.querySelectorAll('.chip[data-sid]').forEach(c=>c.onclick=()=>selectSong(SONGS.find(s=>s.id===c.dataset.sid)));
+  document.getElementById('addChip').onclick=pickFile;
+}
+function renderDiffRow(){
+  const el=document.getElementById('diffRow');
+  el.innerHTML = Object.keys(DIFFICULTIES).map(k=>`<button class="diff-btn ${k===curDiff?'sel':''}" data-d="${k}">${DIFFICULTIES[k].label}<span class="s">${DIFFICULTIES[k].stars}</span></button>`).join('');
+  el.querySelectorAll('.diff-btn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
+}
+function selectSong(s){ if(!s)return; curSong=s; BEAT=60/s.bpm; renderSongChips(); updateSelInfo(); loadLeaderboard(); }
+function selectDiff(k){ curDiff=k; renderDiffRow(); updateSelInfo(); loadLeaderboard(); }
+function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${DIFFICULTIES[curDiff].label}`; }
+
 async function loadLeaderboard(){
-  try{ const r=await fetch('/api/leaderboard?mode='+MODE); const d=await r.json(); renderRank(d.leaderboard,d.total); }
-  catch(e){ toast('서버에 연결할 수 없습니다'); }
+  const list=document.getElementById('rankList');
+  if(!curSong.ranked){
+    list.innerHTML='<div class="empty">🎧 내 음원은 개인 연습용이라<br>랭킹에 반영되지 않아요.</div>';
+    document.getElementById('myBest').textContent='-'; document.getElementById('myRankLine').textContent='';
+    document.getElementById('totalPlayers').textContent='연습 모드'; return;
+  }
+  try{
+    const r=await fetch('/api/leaderboard?mode='+encodeURIComponent(modeKey()));
+    const d=await r.json(); renderRank(d.leaderboard,d.total);
+  }catch(e){ toast('서버에 연결할 수 없습니다'); }
 }
 function renderRank(lb,total){
   document.getElementById('totalPlayers').textContent=(total||lb.length)+'명 참가';
   const mine=lb.find(x=>x.nickname===me.nickname);
-  if(mine){ me.best=mine.score; document.getElementById('myBest').textContent=mine.score.toLocaleString(); document.getElementById('myRankLine').textContent=`현재 ${mine.rank}위 🏅`; }
+  document.getElementById('myBest').textContent = mine?mine.score.toLocaleString():'0';
+  document.getElementById('myRankLine').textContent = mine?`· ${mine.rank}위`:'';
   const avatars=['🦊','🐰','🐻','🐱','🐸','🐧','🐼','🐯','🦁','🐨','🐹','🐵'];
   const list=document.getElementById('rankList');
-  if(!lb.length){ list.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted)">아직 기록이 없어요. 첫 도전자가 되어보세요!</div>'; return; }
+  if(!lb.length){ list.innerHTML='<div class="empty">아직 기록이 없어요.<br>첫 도전자가 되어보세요!</div>'; return; }
   list.innerHTML=lb.map(r=>{
     const rkCls=r.rank===1?'top1':r.rank===2?'top2':r.rank===3?'top3':'';
     const badge=r.rank===1?'👑':r.rank===2?'🥈':r.rank===3?'🥉':r.rank<=10?'⭐':'';
@@ -310,12 +403,46 @@ function renderRank(lb,total){
     return `<div class="rank-row ${r.nickname===me.nickname?'me':''}"><div class="rk ${rkCls}">${r.rank}</div><div class="avatar">${av}</div><div class="badge">${badge}</div><div class="nick">${escapeHtml(r.nickname)}</div><div class="score">${r.score.toLocaleString()}</div><div class="reward">${reward}</div></div>`;
   }).join('');
 }
-function escapeHtml(s){ return s.replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function escapeHtml(s){ return String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+/* ========================================================================
+   실제 음원 업로드
+======================================================================== */
+function pickFile(){ initAudio(); if(actx.state==='suspended') actx.resume(); document.getElementById('fileInput').click(); }
+document.getElementById('fileInput').addEventListener('change', async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  toast('음원 분석 중...');
+  try{
+    const arr=await f.arrayBuffer();
+    const buffer=await actx.decodeAudioData(arr);
+    askBpm(f.name.replace(/\.[^.]+$/,''), buffer);
+  }catch(err){ toast('오디오를 불러올 수 없습니다'); }
+});
+function askBpm(name, buffer){
+  const ov=document.createElement('div'); ov.className='overlay'; ov.id='bpmOverlay';
+  ov.innerHTML=`<div class="modal"><h2>🎧 내 음원 추가</h2>
+    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:12px;">${escapeHtml(name)} · ${buffer.duration.toFixed(0)}초</div>
+    <label class="fld">BPM (빠르기) <input id="inpBpm" type="number" value="120" min="40" max="300"></label>
+    <label class="fld">시작 오프셋(초) <input id="inpOff" type="number" value="0" step="0.05"></label>
+    <div style="font-size:11px;color:var(--muted);margin:4px 0 12px;line-height:1.5;">박자가 안 맞으면 BPM·오프셋을 조절하세요.<br>내 음원은 개인 연습용(랭킹 미반영)입니다.</div>
+    <div class="btn-row"><button class="btn ghost" onclick="document.getElementById('bpmOverlay').remove()">취소</button><button class="btn primary" id="bpmOk">추가하기</button></div>
+  </div>`;
+  document.querySelector('.app').appendChild(ov);
+  document.getElementById('bpmOk').onclick=()=>{
+    const bpm=Math.max(40,Math.min(300, +document.getElementById('inpBpm').value||120));
+    const off=+document.getElementById('inpOff').value||0;
+    const lengthBeats=Math.max(16, Math.floor(buffer.duration*bpm/60)-1);
+    const song={ id:'myaudio', name:name.slice(0,14), cover:'🎧', kind:'file', buffer, bpm, offset:off, lengthBeats, ranked:false };
+    const i=SONGS.findIndex(s=>s.id==='myaudio'); if(i>=0) SONGS[i]=song; else SONGS.push(song);
+    document.getElementById('bpmOverlay').remove();
+    selectSong(song); toast('내 음원이 추가됐어요!');
+  };
+}
 
 /* ========================================================================
    게임
 ======================================================================== */
-let notes=[], rafId=null, playing=false;
+let notes=[], rafId=null, playing=false, curLastBeat=64;
 let score=0, combo=0, maxCombo=0, cPerfect=0, cGood=0, cMiss=0, totalTaps=0;
 
 function startGame(){
@@ -323,13 +450,16 @@ function startGame(){
   if(actx.state==='suspended') actx.resume();
   document.getElementById('home').classList.add('hidden');
   document.getElementById('game').classList.remove('hidden');
+  document.getElementById('gameSong').textContent=`🎶 ${curSong.name} · ${DIFFICULTIES[curDiff].label}`;
   buildGrid();
   score=0;combo=0;maxCombo=0;cPerfect=0;cGood=0;cMiss=0;totalTaps=0;
   updateHUD();
-  // 카운트다운 3,2,1
   const cd=document.getElementById('countdown'); cd.classList.remove('hidden');
   let n=3; cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square');
-  const ci=setInterval(()=>{ n--; if(n>0){ cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square'); } else { clearInterval(ci); cd.textContent='START!'; tone(actx.currentTime,990,0.25,0.3,'square'); setTimeout(()=>cd.classList.add('hidden'),500); beginSong(); } },700);
+  const ci=setInterval(()=>{ n--;
+    if(n>0){ cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square'); }
+    else { clearInterval(ci); cd.textContent='START!'; tone(actx.currentTime,990,0.25,0.3,'square'); setTimeout(()=>cd.classList.add('hidden'),500); beginSong(); }
+  },700);
 }
 
 function buildGrid(){
@@ -343,24 +473,17 @@ function buildGrid(){
 }
 
 function beginSong(){
-  // 노트 인스턴스 생성 (절대 시각 계산)
-  songStart = actx.currentTime + 0.1;
-  const GAP = MULTI_GAP_BEAT * BEAT; // 연타 간격(초)
-  notes = CHART.map((n,idx)=>{
-    const hole = n.hole??n.h, count = n.c||1;
-    const base = songStart + n.b*BEAT;
-    // 팡이 마리당 hit 1개 — 각자 자기 타격시각(연타 간격만큼 시차)을 가짐
-    const hits = [];
-    for(let k=0;k<count;k++) hits.push({ time: base + k*GAP, done:false, ring:null, pangi:null });
-    return {
-      id:idx, hole, count, hits,
-      appearTime: base - LEAD,         // 첫 hit 기준 등장
-      spawned:false, done:false, el:null, stackEl:null,
-    };
+  const chart = genChart(curSong.lengthBeats, curDiff);
+  const GAP = MULTI_GAP_BEAT * BEAT;
+  startMusic(); // songStart 설정
+  notes = chart.map((n,idx)=>{
+    const hole=n.h, count=n.c||1;
+    const base=songStart + n.b*BEAT;
+    const hits=[]; for(let k=0;k<count;k++) hits.push({ time:base+k*GAP, done:false, ring:null, pangi:null });
+    return { id:idx, hole, count, hits, appearTime:base-LEAD, spawned:false, done:false, el:null, stackEl:null };
   });
   totalTaps = notes.reduce((s,n)=>s+n.count,0);
-  // 오디오 스케줄러 시작
-  nextBeat=0; scheduleAudio(); schedulerId=setInterval(scheduleAudio,25);
+  curLastBeat = Math.max(...chart.map(n=>n.b + (n.c>1?(n.c-1)*MULTI_GAP_BEAT:0))) + 2;
   playing=true; loop();
 }
 
@@ -369,32 +492,26 @@ function loop(){
   const now=actx.currentTime;
   for(const n of notes){
     if(n.done) continue;
-    // 등장
     if(!n.spawned && now>=n.appearTime){ spawnNote(n); }
     if(n.spawned){
-      // 다음에 칠 hit(가장 이른 미처리) 찾기
       let nextIdx=-1;
       for(let k=0;k<n.hits.length;k++){ if(!n.hits[k].done){ nextIdx=k; break; } }
-      // 각 hit의 링을 자기 타격시각 기준으로 축소
       for(let k=0;k<n.hits.length;k++){
         const h=n.hits[k]; if(h.done||!h.ring) continue;
-        const scale = 1 + Math.max(0, Math.min(1.7, (h.time - now)/LEAD)); // 자기 시각(1.0)으로 수렴
+        const scale = 1 + Math.max(0, Math.min(1.7, (h.time - now)/LEAD));
         h.ring.style.transform = `translate(-50%,-50%) scale(${scale})`;
         const isNext = (k===nextIdx);
-        h.ring.style.opacity = isNext ? '0.95' : '0.35'; // 다음 칠 링만 선명
+        h.ring.style.opacity = isNext ? '0.95' : '0.35';
         h.ring.classList.toggle('next', isNext);
         h.ring.classList.toggle('perfectzone', isNext && Math.abs(now-h.time)<=W_PERFECT);
-        // 자기 윈도우 초과 → 그 팡이만 MISS (체력 감소 없음)
         if(now > h.time + W_GOOD){ missHit(n,h); }
       }
       if(n.hits.every(h=>h.done)) clearNote(n);
     }
   }
-  // 진행바
-  const elapsed=now-songStart, totalDur=LAST_BEAT*BEAT;
+  const elapsed=now-songStart, totalDur=curLastBeat*BEAT;
   document.getElementById('progressBar').style.width=Math.min(100, Math.max(0,elapsed/totalDur*100))+'%';
-  // 종료
-  if(now > songStart + LAST_BEAT*BEAT){ endSong(); return; }
+  if(now > songStart + curLastBeat*BEAT){ endSong(); return; }
   rafId=requestAnimationFrame(loop);
 }
 
@@ -402,7 +519,6 @@ function spawnNote(n){
   n.spawned=true;
   const hole=document.querySelector(`.hole[data-i="${n.hole}"]`);
   const clip=hole.querySelector('.clip');
-  // 팡이 마리 수만큼 생성 (앞쪽 = 먼저 칠 팡이)
   const stack=document.createElement('div'); stack.className='pangi-stack';
   for(let k=0;k<n.count;k++){
     const p=document.createElement('div'); p.className='pangi '+colorFor(n.hole);
@@ -410,7 +526,6 @@ function spawnNote(n){
     stack.appendChild(p); n.hits[k].pangi=p;
   }
   clip.appendChild(stack);
-  // 팡이 마리 수만큼 링 생성 — 각자 자기 타격시각에 닫힘(연타 타이밍 가이드)
   for(let k=0;k<n.count;k++){
     const ring=document.createElement('div'); ring.className='ring show'; hole.appendChild(ring);
     n.hits[k].ring=ring;
@@ -422,21 +537,19 @@ function spawnNote(n){
 function onTap(hole){
   if(!playing) return;
   const now=actx.currentTime;
-  // 해당 칸에서 '다음에 칠 hit'들 중 타격시각이 가장 가까운 것
   let tNote=null, tHit=null, bestDiff=Infinity;
   for(const n of notes){
     if(n.done || !n.spawned || n.hole!==hole) continue;
-    let h=null; for(const hh of n.hits){ if(!hh.done){ h=hh; break; } } // 가장 이른 미처리 hit
+    let h=null; for(const hh of n.hits){ if(!hh.done){ h=hh; break; } }
     if(!h) continue;
-    if(now < h.time - W_GOOD) continue;     // 아직 너무 이름
+    if(now < h.time - W_GOOD) continue;
     const diff=Math.abs(now-h.time);
     if(diff<bestDiff){ bestDiff=diff; tNote=n; tHit=h; }
   }
-  if(!tHit) return; // 타이밍 밖 터치 무시(체력 감소 없음)
-
+  if(!tHit) return;
   const judge = bestDiff<=W_PERFECT ? 'perfect' : 'good';
   applyHit(tNote, judge);
-  resolveHit(tHit); // 그 링·팡이 제거
+  resolveHit(tHit);
   if(tNote.el){ tNote.el.classList.remove('flash'); void tNote.el.offsetWidth; tNote.el.classList.add('flash'); }
   hitPing();
   if(tNote.hits.every(h=>h.done)) clearNote(tNote);
@@ -445,48 +558,40 @@ function onTap(hole){
 function applyHit(n, judge){
   if(judge==='perfect'){ score+=SCORE.perfect; cPerfect++; combo++; popJudge(n,'PERFECT','perfect'); }
   else { score+=SCORE.good; cGood++; combo++; popJudge(n,'GOOD','good'); }
-  score += Math.floor(combo/10)*5; // 콤보 보너스
+  score += Math.floor(combo/10)*5;
   maxCombo=Math.max(maxCombo,combo);
   updateHUD();
 }
-
 function missHit(n,h){
   if(h.done) return;
   cMiss++; combo=0; popJudge(n,'MISS','miss'); missThud();
   resolveHit(h); updateHUD();
 }
-
 function resolveHit(h){
   h.done=true;
   if(h.ring){ h.ring.remove(); h.ring=null; }
   if(h.pangi){ h.pangi.remove(); h.pangi=null; }
 }
-
 function clearNote(n){
   if(n.done) return;
   n.done=true;
   for(const h of n.hits){ if(h.ring){ h.ring.remove(); h.ring=null; } }
   if(n.stackEl){ const s=n.stackEl; s.classList.remove('up'); s.classList.add('retract'); setTimeout(()=>s.remove(),200); n.stackEl=null; }
 }
-
 function popJudge(n,text,cls){
   if(!n.el) return;
   const p=document.createElement('div'); p.className='judge-pop judge-'+cls; p.textContent=text; n.el.appendChild(p); setTimeout(()=>p.remove(),500);
 }
-
 function updateHUD(){
   document.getElementById('scoreBig').textContent=score.toLocaleString();
   document.getElementById('comboNum').textContent=combo;
   const maxScore=totalTaps*SCORE.perfect || 1;
-  const acc=Math.min(100, score/maxScore*100);
-  document.getElementById('accLine').textContent='정확도 '+acc.toFixed(1)+'%';
+  document.getElementById('accLine').textContent='정확도 '+Math.min(100, score/maxScore*100).toFixed(1)+'%';
 }
 
 async function endSong(){
-  playing=false;
-  if(schedulerId){ clearInterval(schedulerId); schedulerId=null; }
+  playing=false; stopMusic();
   if(rafId) cancelAnimationFrame(rafId);
-  // 결과 화면
   const maxScore=totalTaps*SCORE.perfect || 1;
   const acc=Math.min(100, score/maxScore*100);
   const grade = acc>=95?'S':acc>=85?'A':acc>=70?'B':acc>=50?'C':'D';
@@ -511,9 +616,13 @@ async function endSong(){
   </div>`;
   document.getElementById('game').appendChild(ov);
   tone(actx.currentTime,880,0.25,0.4,'triangle');
-  // 서버 등록
+
+  if(!curSong.ranked){
+    document.getElementById('resRank').innerHTML=`정확도 ${acc.toFixed(1)}% · 🎧 내 음원(랭킹 미반영)`;
+    return;
+  }
   try{
-    const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:me.nickname,score,mode:MODE})});
+    const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:me.nickname,score,mode:modeKey()})});
     const d=await r.json();
     if(d.ok){
       if(d.isBest) document.getElementById('newBest').classList.remove('hidden');
@@ -523,19 +632,18 @@ async function endSong(){
   }catch(e){ document.getElementById('resRank').textContent='서버 등록 실패 (오프라인)'; }
 }
 
-function goHome(){ document.getElementById('resOverlay')?.remove(); document.getElementById('game').classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); loadLeaderboard(); }
-function retry(){ document.getElementById('resOverlay')?.remove(); startGame(); }
+function goHome(){ stopMusic(); document.getElementById('resOverlay')?.remove(); document.getElementById('game').classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); loadLeaderboard(); }
+function retry(){ stopMusic(); document.getElementById('resOverlay')?.remove(); startGame(); }
 
-/* 도움말 */
 function openHelp(){
   const ov=document.createElement('div');ov.className='overlay';ov.id='helpOverlay';
   ov.innerHTML=`<div class="modal" style="max-height:84vh;overflow-y:auto;">
     <h2>📖 플레이 방법</h2>
-    <div class="help-step"><div class="n">1</div><div class="txt"><b>노래 박자</b>에 맞춰 9개 칸에서 팡이가 순서대로 튀어나와요.</div></div>
-    <div class="help-step"><div class="n">2</div><div class="txt">팡이를 감싸는 <b>파란 링</b>이 점점 줄어들어요. 링이 팡이 크기에 <b>딱 맞는 순간</b> 터치하면 <b style="color:#ffce4a">PERFECT</b>!</div></div>
-    <div class="help-step"><div class="n">3</div><div class="txt">타이밍이 살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. 단, <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
-    <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b> 나오면 <b>링도 마리 수만큼</b> 나와요. 링이 <b>차례로 닫히는 순서</b>대로 탁-탁-탁 연달아 터치! (다음 칠 링이 가장 선명해요)</div></div>
-    <div class="help-step"><div class="n">5</div><div class="txt">콤보를 길게 이어갈수록 보너스 점수 UP. 최종 점수와 등급이 <b>리듬 랭킹</b>에 반영돼요.</div></div>
+    <div class="help-step"><div class="n">1</div><div class="txt"><b>곡</b>과 <b>난이도</b>(쉬움/보통/어려움)를 고르고 플레이하세요. <b>＋내 MP3</b>로 내 음악도 불러올 수 있어요(연습용).</div></div>
+    <div class="help-step"><div class="n">2</div><div class="txt">노래 박자에 맞춰 9칸에서 팡이가 등장하고, 감싼 <b>링이 줄어들어요</b>. 링이 딱 맞는 순간 터치 → <b style="color:#ffce4a">PERFECT</b>!</div></div>
+    <div class="help-step"><div class="n">3</div><div class="txt">살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
+    <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b>면 <b>링도 마리 수만큼</b> 차례로 닫혀요. 순서대로 탁-탁-탁 연달아 터치!</div></div>
+    <div class="help-step"><div class="n">5</div><div class="txt">최종 점수와 등급(S~D)이 <b>곡·난이도별 랭킹</b>에 반영돼요.</div></div>
     <div class="btn-row"><button class="btn primary" onclick="document.getElementById('helpOverlay').remove()">확인</button></div>
   </div>`;
   document.querySelector('.app').appendChild(ov);

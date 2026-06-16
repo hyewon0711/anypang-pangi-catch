@@ -14,10 +14,10 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DB_FILE = path.join(__dirname, 'scores.json');
-const MODES = ['catch', 'rhythm'];
 
 /* ---------- 간단 파일 DB ---------- */
-// 저장 구조: { modes: { catch: {nick:{score,plays,updatedAt}}, rhythm: {...} } }
+// 저장 구조: { modes: { 'catch': {nick:{...}}, 'rhythm:pangibeat:normal': {...}, ... } }
+// mode 키는 임의 문자열 허용: 'catch', 'rhythm:<곡>:<난이도>' 등 (곡·난이도별 랭킹 분리)
 function loadDB() {
   try {
     const d = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
@@ -29,8 +29,13 @@ function loadDB() {
 function saveDB() { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); }
 let db = loadDB();
 
+// 안전한 mode 키만 허용 (영문/숫자/: _ -), 그 외엔 'catch'
+function sanitizeMode(m) {
+  m = String(m || '').toLowerCase();
+  return /^[a-z0-9:_-]{1,48}$/.test(m) ? m : 'catch';
+}
 function modeStore(mode) {
-  const key = MODES.includes(mode) ? mode : 'catch';
+  const key = sanitizeMode(mode);
   if (!db.modes[key]) db.modes[key] = {};
   return db.modes[key];
 }
@@ -74,9 +79,9 @@ function sendJSON(res, code, obj) {
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://localhost');
 
-  // 랭킹 조회  /api/leaderboard?mode=catch|rhythm
+  // 랭킹 조회  /api/leaderboard?mode=catch | rhythm:<곡>:<난이도>
   if (req.method === 'GET' && u.pathname === '/api/leaderboard') {
-    const mode = u.searchParams.get('mode') || 'catch';
+    const mode = sanitizeMode(u.searchParams.get('mode') || 'catch');
     return sendJSON(res, 200, { ok: true, mode, leaderboard: leaderboard(mode, 100), total: Object.keys(modeStore(mode)).length });
   }
 
@@ -86,7 +91,7 @@ const server = http.createServer((req, res) => {
     req.on('data', c => { body += c; if (body.length > 1e4) req.destroy(); });
     req.on('end', () => {
       let data; try { data = JSON.parse(body); } catch { return sendJSON(res, 400, { ok: false, error: 'bad json' }); }
-      const mode = MODES.includes(data.mode) ? data.mode : 'catch';
+      const mode = sanitizeMode(data.mode);
       const nickname = cleanNick(data.nickname);
       const score = Math.max(0, Math.min(99999999, Math.floor(Number(data.score) || 0)));
       if (!nickname) return sendJSON(res, 400, { ok: false, error: '닉네임이 필요합니다' });
