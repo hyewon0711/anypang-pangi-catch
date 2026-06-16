@@ -4,6 +4,8 @@
  *
  * 실행:  node server.js
  * 접속:  http://localhost:3000  (같은 네트워크의 다른 유저는 http://<내IP>:3000)
+ *
+ * 모드별 랭킹 분리: catch(팡이 잡기) / rhythm(리듬 모드)
  */
 const http = require('http');
 const fs = require('fs');
@@ -12,20 +14,31 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DB_FILE = path.join(__dirname, 'scores.json');
+const MODES = ['catch', 'rhythm'];
 
 /* ---------- 간단 파일 DB ---------- */
+// 저장 구조: { modes: { catch: {nick:{score,plays,updatedAt}}, rhythm: {...} } }
 function loadDB() {
-  try { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
-  catch { return { scores: {} }; } // scores: { nickname: {score, plays, updatedAt} }
+  try {
+    const d = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    if (d.modes) return d;
+    if (d.scores) return { modes: { catch: d.scores } }; // 구버전 평면 구조 마이그레이션
+    return { modes: {} };
+  } catch { return { modes: {} }; }
 }
-function saveDB(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
-}
+function saveDB() { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); }
 let db = loadDB();
 
+function modeStore(mode) {
+  const key = MODES.includes(mode) ? mode : 'catch';
+  if (!db.modes[key]) db.modes[key] = {};
+  return db.modes[key];
+}
+
 /* ---------- 랭킹 계산 ---------- */
-function leaderboard(limit = 100) {
-  return Object.entries(db.scores)
+function leaderboard(mode, limit = 100) {
+  const store = modeStore(mode);
+  return Object.entries(store)
     .map(([nickname, v]) => ({ nickname, score: v.score, plays: v.plays || 1, updatedAt: v.updatedAt }))
     .sort((a, b) => b.score - a.score || a.updatedAt - b.updatedAt)
     .slice(0, limit)
@@ -59,33 +72,38 @@ function sendJSON(res, code, obj) {
 
 /* ---------- 서버 ---------- */
 const server = http.createServer((req, res) => {
-  // 랭킹 조회
-  if (req.method === 'GET' && req.url.startsWith('/api/leaderboard')) {
-    return sendJSON(res, 200, { ok: true, leaderboard: leaderboard(100), total: Object.keys(db.scores).length });
+  const u = new URL(req.url, 'http://localhost');
+
+  // 랭킹 조회  /api/leaderboard?mode=catch|rhythm
+  if (req.method === 'GET' && u.pathname === '/api/leaderboard') {
+    const mode = u.searchParams.get('mode') || 'catch';
+    return sendJSON(res, 200, { ok: true, mode, leaderboard: leaderboard(mode, 100), total: Object.keys(modeStore(mode)).length });
   }
 
-  // 점수 등록 (최고점만 갱신)
-  if (req.method === 'POST' && req.url === '/api/score') {
+  // 점수 등록 (모드별 최고점만 갱신)
+  if (req.method === 'POST' && u.pathname === '/api/score') {
     let body = '';
     req.on('data', c => { body += c; if (body.length > 1e4) req.destroy(); });
     req.on('end', () => {
       let data; try { data = JSON.parse(body); } catch { return sendJSON(res, 400, { ok: false, error: 'bad json' }); }
+      const mode = MODES.includes(data.mode) ? data.mode : 'catch';
       const nickname = cleanNick(data.nickname);
       const score = Math.max(0, Math.min(99999999, Math.floor(Number(data.score) || 0)));
       if (!nickname) return sendJSON(res, 400, { ok: false, error: '닉네임이 필요합니다' });
 
-      const cur = db.scores[nickname] || { score: 0, plays: 0 };
+      const store = modeStore(mode);
+      const cur = store[nickname] || { score: 0, plays: 0 };
       const isBest = score > cur.score;
-      db.scores[nickname] = {
+      store[nickname] = {
         score: isBest ? score : cur.score,
         plays: (cur.plays || 0) + 1,
         updatedAt: Date.now(),
       };
-      saveDB(db);
+      saveDB();
 
-      const lb = leaderboard(100);
+      const lb = leaderboard(mode, 100);
       const myRank = lb.find(r => r.nickname === nickname)?.rank || null;
-      return sendJSON(res, 200, { ok: true, isBest, best: db.scores[nickname].score, myRank, leaderboard: lb });
+      return sendJSON(res, 200, { ok: true, mode, isBest, best: store[nickname].score, myRank, leaderboard: lb });
     });
     return;
   }
@@ -96,8 +114,8 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n🕳️  팡이를 잡아라! 서버 실행 중`);
-  console.log(`   로컬:      http://localhost:${PORT}`);
-  // 사내/동일 네트워크 접속용 IP 안내
+  console.log(`   로컬:      http://localhost:${PORT}            (팡이 잡기)`);
+  console.log(`              http://localhost:${PORT}/rhythm.html (리듬 모드)`);
   const os = require('os');
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {

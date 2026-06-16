@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>팡이 리듬! 🎵</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+  :root{--bg1:#1b2b4d;--gold:#ffce4a;--gold2:#ff9d2e;--green:#46d17e;--panel:#26346a;--panel2:#141f3f;--muted:#a8b8e6;--ink:#10182f;--pink:#ff6fa5;--cyan:#46d1d1;}
+  html,body{height:100%;}
+  body{background:radial-gradient(circle at 50% 0%,#3a4a99,var(--bg1) 60%,#0e1430);display:flex;align-items:center;justify-content:center;min-height:100vh;color:#fff;overflow:hidden;}
+  .app{width:min(440px,100vw);height:100vh;max-height:900px;position:relative;display:flex;flex-direction:column;}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;}
+  .hidden{display:none!important;}
+  .btn{padding:15px 20px;border:none;border-radius:14px;font-weight:900;font-size:16px;cursor:pointer;transition:.1s;}
+  .btn:active{transform:translateY(3px);}
+  .btn.primary{background:linear-gradient(180deg,#7be3a1,var(--green));color:#0a3a1f;box-shadow:0 5px 0 #2c9c58;}
+  .btn.gold{background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);box-shadow:0 4px 0 #b86a12;}
+  .btn.ghost{background:var(--panel);color:#fff;border:1px solid rgba(255,255,255,.2);}
+  .btn:active{box-shadow:none;}
+
+  /* ===== 로비 ===== */
+  #lobby{align-items:center;justify-content:center;padding:24px;text-align:center;}
+  .logo{font-size:38px;font-weight:900;text-shadow:0 4px 0 #2d4d9c,0 6px 10px rgba(0,0,0,.4);margin-bottom:4px;}
+  .logo .note{display:inline-block;animation:bounce 1s ease-in-out infinite;}
+  @keyframes bounce{50%{transform:translateY(-8px)}}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
+  .song-card{width:100%;max-width:320px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:18px;padding:18px;margin-bottom:18px;border:1px solid rgba(255,255,255,.12);}
+  .song-card .cover{font-size:46px;margin-bottom:8px;}
+  .song-card .name{font-size:20px;font-weight:900;}
+  .song-card .meta{font-size:12px;color:var(--muted);margin-top:4px;}
+  .nick-input{width:100%;max-width:320px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;font-size:17px;text-align:center;font-weight:700;margin-bottom:14px;}
+  .nick-input:focus{outline:none;border-color:var(--gold);}
+  .lobby-links{margin-top:18px;display:flex;gap:14px;font-size:13px;}
+  .lobby-links a{color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--muted);}
+
+  /* ===== 헤더 ===== */
+  .topbar{padding:14px 16px 6px;display:flex;align-items:center;justify-content:space-between;}
+  .title{font-size:19px;font-weight:900;text-shadow:0 3px 0 #2d4d9c;display:flex;gap:6px;align-items:center;}
+  .me-chip{background:var(--panel2);padding:6px 12px;border-radius:20px;font-size:12px;color:var(--muted);}
+  .me-chip b{color:#fff;}
+  .help-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);font-weight:900;font-size:17px;box-shadow:0 3px 0 #b86a12;}
+
+  /* ===== 홈 랭킹 ===== */
+  .home-best{margin:6px 16px 10px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:16px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,.1);}
+  .home-best .lbl{font-size:12px;color:var(--muted);}
+  .home-best .v{font-size:30px;font-weight:900;color:var(--gold);}
+  .home-best .rk{font-size:13px;margin-top:2px;}
+  .rank-wrap{flex:1;margin:0 16px;background:var(--panel2);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);}
+  .rank-head{padding:10px 14px;font-size:13px;font-weight:800;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;}
+  .rank-list{flex:1;overflow-y:auto;}
+  .rank-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+  .rank-row.me{background:rgba(255,206,74,.14);}
+  .rk{width:26px;text-align:center;font-weight:900;color:var(--muted);}
+  .rk.top1{color:#ffce4a}.rk.top2{color:#d9d9ec}.rk.top3{color:#e2935a}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#5a75d0,#2c4c8a);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid rgba(255,255,255,.15);}
+  .badge{font-size:14px;width:18px;}
+  .nick{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .score{font-weight:900;font-variant-numeric:tabular-nums;}
+  .reward{font-size:16px;width:22px;text-align:center;}
+  .play-area{padding:12px 16px 18px;display:flex;gap:10px;}
+  .play-btn{flex:1;padding:16px;border:none;border-radius:18px;cursor:pointer;background:linear-gradient(180deg,#ffd76b,var(--gold2));color:var(--ink);font-size:18px;font-weight:900;box-shadow:0 5px 0 #b86a12;}
+  .play-btn:active{transform:translateY(4px);box-shadow:none;}
+  .refresh-btn{width:54px;border:none;border-radius:18px;background:var(--panel);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 5px 0 #0c1430;}
+  .refresh-btn:active{transform:translateY(4px);box-shadow:none;}
+
+  /* ===== 게임 ===== */
+  #game{background:radial-gradient(circle at 50% 25%,#2a3a6e,#0e1430);}
+  .game-hud{padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:flex-start;}
+  .hud-l .score-big{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;}
+  .hud-l .acc{font-size:12px;color:var(--muted);margin-top:2px;}
+  .hud-r{text-align:right;}
+  .hud-r .combo{font-size:30px;font-weight:900;color:var(--gold);line-height:1;}
+  .hud-r .combo small{font-size:13px;color:var(--muted);}
+  .progress{height:6px;margin:6px 16px 0;background:var(--panel2);border-radius:4px;overflow:hidden;}
+  .progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .1s linear;}
+  .song-name-mini{text-align:center;font-size:12px;color:var(--muted);margin-top:6px;}
+
+  .grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:min(360px,90vw);}
+  .hole{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#16203e 40%,#0a1228 100%);box-shadow:inset 0 8px 18px rgba(0,0,0,.8),inset 0 -3px 6px rgba(80,110,200,.25);position:relative;overflow:visible;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .hole .clip{position:absolute;inset:0;border-radius:50%;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;}
+  .hole::after{content:'';position:absolute;left:8%;right:8%;top:6%;height:30%;border-radius:50%;background:radial-gradient(ellipse at 50% 0%,rgba(0,0,0,.6),transparent 70%);pointer-events:none;z-index:5;}
+  .hole.flash{animation:holeFlash .25s ease-out;}
+  @keyframes holeFlash{0%{box-shadow:inset 0 8px 18px rgba(0,0,0,.8),0 0 0 0 var(--gold)}100%{box-shadow:inset 0 8px 18px rgba(0,0,0,.8),0 0 0 14px rgba(255,206,74,0)}}
+
+  /* 접근 링 (타이밍 가이드) */
+  .ring{position:absolute;left:50%;top:50%;width:100%;height:100%;border-radius:50%;border:4px solid var(--cyan);transform:translate(-50%,-50%) scale(2);opacity:0;pointer-events:none;z-index:6;}
+  .ring.show{opacity:.9;}
+  .ring.perfectzone{border-color:var(--gold);}
+
+  /* 팡이 */
+  .pangi-stack{position:absolute;bottom:-110%;display:flex;transition:bottom .18s cubic-bezier(.34,1.56,.64,1);padding-bottom:8%;z-index:4;}
+  .pangi-stack.up{bottom:6%;}
+  .pangi-stack.retract{bottom:-120%;transition:bottom .18s ease-in;}
+  .pangi{width:44px;height:44px;border-radius:50%;position:relative;margin:0 -7px;box-shadow:0 4px 8px rgba(0,0,0,.4);animation:wob 1.2s ease-in-out infinite;}
+  @keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  .pangi.white{background:radial-gradient(circle at 38% 30%,#fff,#c9c2dd 75%,#9a90bb);}
+  .pangi.black{background:radial-gradient(circle at 38% 30%,#5a5070,#211a33 75%,#100b1c);}
+  .pangi.gold{background:radial-gradient(circle at 38% 30%,#fff3c0,#ffce4a 60%,#e08a18);box-shadow:0 0 14px rgba(255,206,74,.7);}
+  .pangi .eye{position:absolute;top:34%;width:10px;height:12px;background:#fff;border-radius:50%;}
+  .pangi .eye.l{left:26%}.pangi .eye.r{right:26%}
+  .pangi .eye::after{content:'';position:absolute;top:32%;left:28%;width:4px;height:5px;background:#111;border-radius:50%;}
+
+  .judge-pop{position:absolute;left:50%;top:40%;transform:translateX(-50%);font-weight:900;font-size:18px;pointer-events:none;z-index:8;animation:jp .5s ease-out forwards;text-shadow:0 2px 4px #000;}
+  @keyframes jp{0%{opacity:0;transform:translate(-50%,4px) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-22px) scale(1.1)}}
+  .judge-perfect{color:var(--gold)} .judge-good{color:var(--cyan)} .judge-miss{color:var(--pink)}
+
+  .countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;font-size:90px;font-weight:900;color:#fff;text-shadow:0 0 30px var(--gold);}
+
+  /* 모달 */
+  .overlay{position:absolute;inset:0;background:rgba(8,12,30,.85);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:40;padding:20px;}
+  .modal{width:100%;max-width:340px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:22px;padding:22px;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 50px rgba(0,0,0,.6);}
+  .modal h2{text-align:center;font-size:20px;margin-bottom:14px;color:var(--gold);}
+  .res-score{text-align:center;font-size:40px;font-weight:900;color:var(--gold);}
+  .res-grade{text-align:center;font-size:54px;font-weight:900;margin:4px 0;}
+  .res-stats{display:flex;justify-content:space-around;background:var(--panel2);border-radius:12px;padding:12px;margin:12px 0;}
+  .res-stats .st{text-align:center;font-size:11px;color:var(--muted);}
+  .res-stats .st b{display:block;font-size:18px;margin-top:2px;}
+  .res-stats .st.p b{color:var(--gold)}.res-stats .st.g b{color:var(--cyan)}.res-stats .st.m b{color:var(--pink)}
+  .res-rank{text-align:center;font-size:14px;margin-bottom:12px;}
+  .res-rank b{color:var(--gold);font-size:20px;}
+  .new-best{text-align:center;color:var(--green);font-weight:900;font-size:14px;margin-bottom:6px;animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:.5}}
+  .btn-row{display:flex;gap:10px;margin-top:6px;}
+  .btn-row .btn{flex:1;}
+  .help-step{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start;}
+  .help-step .n{width:25px;height:25px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .help-step .txt{font-size:13px;line-height:1.5;color:#e6ecff;}
+  .help-step .txt b{color:var(--gold);}
+  .toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:10px 18px;border-radius:20px;font-size:13px;z-index:60;opacity:0;transition:.3s;white-space:nowrap;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== 로비 ===== -->
+  <div class="screen" id="lobby">
+    <div class="logo">🎵 팡이 리듬<span class="note">♪</span></div>
+    <div class="sub">노래 박자에 맞춰 팡이를 터치하세요</div>
+    <div class="song-card">
+      <div class="cover">🎶</div>
+      <div class="name">팡이 비트</div>
+      <div class="meta">BPM 120 · ★★☆ · 약 35초</div>
+    </div>
+    <input class="nick-input" id="nickInput" maxlength="12" placeholder="닉네임을 입력하세요" autocomplete="off">
+    <button class="btn primary" style="width:100%;max-width:320px;" onclick="enter()">입장하기 ▶</button>
+    <div class="lobby-links">
+      <a href="/">🕳️ 팡이 잡기 모드</a>
+    </div>
+  </div>
+
+  <!-- ===== 홈 (랭킹) ===== -->
+  <div class="screen hidden" id="home">
+    <div class="topbar">
+      <div class="title">🎵 팡이 리듬</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="me-chip">👤 <b id="meNick">-</b></span>
+        <button class="help-btn" onclick="openHelp()">?</button>
+      </div>
+    </div>
+    <div class="home-best">
+      <div class="lbl">내 최고 점수 · 팡이 비트</div>
+      <div class="v" id="myBest">0</div>
+      <div class="rk" id="myRankLine">랭킹에 도전해보세요!</div>
+    </div>
+    <div class="rank-wrap">
+      <div class="rank-head"><span>🏆 리듬 랭킹</span><span id="totalPlayers">0명 참가</span></div>
+      <div class="rank-list" id="rankList"><div style="padding:30px;text-align:center;color:var(--muted)">불러오는 중...</div></div>
+    </div>
+    <div class="play-area">
+      <button class="play-btn" onclick="startGame()">🎵 플레이 시작</button>
+      <button class="refresh-btn" onclick="loadLeaderboard()" title="새로고침">🔄</button>
+    </div>
+  </div>
+
+  <!-- ===== 게임 ===== -->
+  <div class="screen hidden" id="game">
+    <div class="game-hud">
+      <div class="hud-l"><div class="score-big" id="scoreBig">0</div><div class="acc" id="accLine">정확도 100.0%</div></div>
+      <div class="hud-r"><div class="combo"><span id="comboNum">0</span><small> COMBO</small></div></div>
+    </div>
+    <div class="progress"><div class="bar" id="progressBar"></div></div>
+    <div class="song-name-mini">🎶 팡이 비트</div>
+    <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+    <div class="countdown hidden" id="countdown"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========================================================================
+   상태 / 설정
+======================================================================== */
+let me = { nickname:'', best:0 };
+const MODE = 'rhythm';
+const BPM = 120;
+const BEAT = 60 / BPM;          // 0.5s
+const LEAD = 0.95;              // 팡이가 올라온 뒤 타격 지점까지 걸리는 시간(s)
+const W_PERFECT = 0.085;        // ±0.085s = PERFECT
+const W_GOOD    = 0.18;         // ±0.18s = GOOD (그 밖은 MISS)
+const SCORE = { perfect:300, good:100, extra:150 };
+
+/* 팡이 색(칸 위치별 고정 — 시각적 다양성) */
+function colorFor(hole){ return ['white','black','gold','black','gold','white','gold','white','black'][hole]; }
+
+/* ------------------------------------------------------------------------
+   채보(Chart): "팡이 비트" — 박자(beat) 단위로 노트 정의
+   {b: 박자, h: 칸(0~8), c: 팡이 수(연타)}
+   같은 칸은 충분히 간격을 둬 겹치지 않게 배치.
+------------------------------------------------------------------------ */
+const CHART = [
+  // 인트로 (4박마다 한 칸씩, 여유롭게)
+  {b:4,h:4},{b:6,h:1},{b:8,h:7},{b:10,h:3},{b:12,h:5},{b:14,h:4},
+  // 빌드업 (2박 간격으로 이동)
+  {b:16,h:0},{b:18,h:2},{b:20,h:8},{b:22,h:6},{b:24,h:1},{b:26,h:7},
+  // 1절 (매 박, 칸 이동)
+  {b:28,h:3},{b:29,h:5},{b:30,h:0},{b:31,h:8},
+  {b:32,h:1},{b:33,h:7},{b:34,h:2},{b:35,h:6},
+  // 연타 등장 (한 칸 2~3마리)
+  {b:37,h:4,c:2},{b:39,h:0},{b:40,h:8},{b:41,h:4,c:3},
+  {b:43,h:2},{b:44,h:6},{b:45,h:1,c:2},
+  // 클라이맥스 (엇박 + 빠른 이동)
+  {b:48,h:3},{b:48.5,h:5},{b:49,h:1},{b:49.5,h:7},
+  {b:50,h:0},{b:50.5,h:2},{b:51,h:6},{b:51.5,h:8},
+  {b:52,h:4,c:3},{b:54,h:1,c:2},{b:55,h:7,c:2},
+  // 마무리
+  {b:57,h:3},{b:58,h:5},{b:59,h:4},{b:61,h:4,c:2},
+];
+const LAST_BEAT = Math.max(...CHART.map(n => n.b)) + 2;
+
+/* 배경 멜로디(펜타토닉) — 박자마다 순환 */
+const MELODY = [523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33];
+
+/* ========================================================================
+   WebAudio — 곡 생성 + 효과음
+======================================================================== */
+let actx, masterGain, noiseBuf;
+function initAudio(){
+  if(actx) return;
+  actx = new (window.AudioContext||window.webkitAudioContext)();
+  masterGain = actx.createGain(); masterGain.gain.value = 0.6; masterGain.connect(actx.destination);
+  // 노이즈 버퍼(드럼용)
+  noiseBuf = actx.createBuffer(1, actx.sampleRate*0.3, actx.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+}
+function env(gain, t, a, peak, d){ gain.setValueAtTime(0,t); gain.linearRampToValueAtTime(peak,t+a); gain.exponentialRampToValueAtTime(0.0001,t+a+d); }
+function kick(t){ const o=actx.createOscillator(),g=actx.createGain(); o.connect(g);g.connect(masterGain); o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12); env(g.gain,t,0.001,0.9,0.18); o.start(t);o.stop(t+0.2); }
+function snare(t){ const n=actx.createBufferSource();n.buffer=noiseBuf; const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=1200; const g=actx.createGain(); n.connect(f);f.connect(g);g.connect(masterGain); env(g.gain,t,0.001,0.35,0.14); n.start(t);n.stop(t+0.16); }
+function hat(t){ const n=actx.createBufferSource();n.buffer=noiseBuf; const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=7000; const g=actx.createGain(); n.connect(f);f.connect(g);g.connect(masterGain); env(g.gain,t,0.001,0.12,0.04); n.start(t);n.stop(t+0.05); }
+function tone(t,freq,peak,dur,type){ const o=actx.createOscillator(),g=actx.createGain(); o.type=type||'triangle';o.frequency.value=freq; o.connect(g);g.connect(masterGain); env(g.gain,t,0.005,peak,dur); o.start(t);o.stop(t+dur+0.05); }
+function hitPing(){ if(!actx)return; const t=actx.currentTime; tone(t,1320,0.25,0.12,'square'); }
+function missThud(){ if(!actx)return; const t=actx.currentTime; tone(t,160,0.2,0.12,'sawtooth'); }
+
+/* 곡 스케줄러 (lookahead) */
+let songStart=0, nextBeat=0, schedulerId=null;
+function scheduleAudio(){
+  const ahead = actx.currentTime + 0.12;
+  while(songStart + nextBeat*BEAT < ahead){
+    const t = songStart + nextBeat*BEAT;
+    const ib = Math.round(nextBeat);
+    const isInt = Math.abs(nextBeat - ib) < 0.01;
+    if(isInt){
+      kick(t);                                  // 4-on-the-floor
+      if(ib % 2 === 1) snare(t);                // 스네어 2,4박
+      tone(t, MELODY[ib % MELODY.length], 0.14, 0.32, 'triangle'); // 멜로디
+      if(ib % 4 === 0) tone(t, MELODY[ib%MELODY.length]/2, 0.16, 0.45, 'sine'); // 베이스
+    }
+    hat(t);                                     // 하이햇 매 반박
+    nextBeat += 0.5;
+  }
+}
+
+/* ========================================================================
+   입장 / 랭킹
+======================================================================== */
+function enter(){
+  const v=document.getElementById('nickInput').value.trim();
+  if(!v){ toast('닉네임을 입력해주세요'); return; }
+  me.nickname=v; document.getElementById('meNick').textContent=v;
+  localStorage.setItem('pangi_nick',v);
+  document.getElementById('lobby').classList.add('hidden');
+  document.getElementById('home').classList.remove('hidden');
+  loadLeaderboard();
+}
+document.getElementById('nickInput').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
+const saved=localStorage.getItem('pangi_nick'); if(saved) document.getElementById('nickInput').value=saved;
+
+async function loadLeaderboard(){
+  try{ const r=await fetch('/api/leaderboard?mode='+MODE); const d=await r.json(); renderRank(d.leaderboard,d.total); }
+  catch(e){ toast('서버에 연결할 수 없습니다'); }
+}
+function renderRank(lb,total){
+  document.getElementById('totalPlayers').textContent=(total||lb.length)+'명 참가';
+  const mine=lb.find(x=>x.nickname===me.nickname);
+  if(mine){ me.best=mine.score; document.getElementById('myBest').textContent=mine.score.toLocaleString(); document.getElementById('myRankLine').textContent=`현재 ${mine.rank}위 🏅`; }
+  const avatars=['🦊','🐰','🐻','🐱','🐸','🐧','🐼','🐯','🦁','🐨','🐹','🐵'];
+  const list=document.getElementById('rankList');
+  if(!lb.length){ list.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted)">아직 기록이 없어요. 첫 도전자가 되어보세요!</div>'; return; }
+  list.innerHTML=lb.map(r=>{
+    const rkCls=r.rank===1?'top1':r.rank===2?'top2':r.rank===3?'top3':'';
+    const badge=r.rank===1?'👑':r.rank===2?'🥈':r.rank===3?'🥉':r.rank<=10?'⭐':'';
+    const reward=r.rank===1?'🎁':r.rank<=3?'📦':r.rank<=10?'🎀':'';
+    const av=avatars[(r.nickname.charCodeAt(0)||0)%avatars.length];
+    return `<div class="rank-row ${r.nickname===me.nickname?'me':''}"><div class="rk ${rkCls}">${r.rank}</div><div class="avatar">${av}</div><div class="badge">${badge}</div><div class="nick">${escapeHtml(r.nickname)}</div><div class="score">${r.score.toLocaleString()}</div><div class="reward">${reward}</div></div>`;
+  }).join('');
+}
+function escapeHtml(s){ return s.replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+/* ========================================================================
+   게임
+======================================================================== */
+let notes=[], rafId=null, playing=false;
+let score=0, combo=0, maxCombo=0, cPerfect=0, cGood=0, cMiss=0, totalTaps=0;
+
+function startGame(){
+  initAudio();
+  if(actx.state==='suspended') actx.resume();
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  buildGrid();
+  score=0;combo=0;maxCombo=0;cPerfect=0;cGood=0;cMiss=0;totalTaps=0;
+  updateHUD();
+  // 카운트다운 3,2,1
+  const cd=document.getElementById('countdown'); cd.classList.remove('hidden');
+  let n=3; cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square');
+  const ci=setInterval(()=>{ n--; if(n>0){ cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square'); } else { clearInterval(ci); cd.textContent='START!'; tone(actx.currentTime,990,0.25,0.3,'square'); setTimeout(()=>cd.classList.add('hidden'),500); beginSong(); } },700);
+}
+
+function buildGrid(){
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  for(let i=0;i<9;i++){
+    const hole=document.createElement('div'); hole.className='hole'; hole.dataset.i=i;
+    hole.innerHTML='<div class="clip"></div>';
+    hole.addEventListener('pointerdown',e=>{ e.preventDefault(); onTap(i); });
+    grid.appendChild(hole);
+  }
+}
+
+function beginSong(){
+  // 노트 인스턴스 생성 (절대 시각 계산)
+  songStart = actx.currentTime + 0.1;
+  notes = CHART.map((n,idx)=>({
+    id:idx, hole:n.hole??n.h, count:n.c||1,
+    tapTime: songStart + (n.b)*BEAT,
+    appearTime: songStart + (n.b)*BEAT - LEAD,
+    spawned:false, done:false, remaining:n.c||1, started:false,
+    el:null, stackEl:null, ringEl:null,
+  }));
+  totalTaps = notes.reduce((s,n)=>s+n.count,0);
+  // 오디오 스케줄러 시작
+  nextBeat=0; scheduleAudio(); schedulerId=setInterval(scheduleAudio,25);
+  playing=true; loop();
+}
+
+function loop(){
+  if(!playing) return;
+  const now=actx.currentTime;
+  for(const n of notes){
+    if(n.done) continue;
+    // 등장
+    if(!n.spawned && now>=n.appearTime){ spawnNote(n); }
+    if(n.spawned){
+      // 접근 링 스케일: 등장(2.0) → 타격시각(1.0)
+      const prog = Math.min(1.5, (now - n.appearTime) / LEAD);
+      const scale = 1 + Math.max(0, 1-prog); // prog 0→scale2, prog1→scale1
+      n.ringEl.style.transform = `translate(-50%,-50%) scale(${scale})`;
+      if(Math.abs(now-n.tapTime) <= W_PERFECT) n.ringEl.classList.add('perfectzone');
+      // 윈도우 초과 → 남은 팡이 MISS 처리
+      if(now > n.tapTime + W_GOOD){ failNote(n); }
+    }
+  }
+  // 진행바
+  const elapsed=now-songStart, totalDur=LAST_BEAT*BEAT;
+  document.getElementById('progressBar').style.width=Math.min(100, Math.max(0,elapsed/totalDur*100))+'%';
+  // 종료
+  if(now > songStart + LAST_BEAT*BEAT){ endSong(); return; }
+  rafId=requestAnimationFrame(loop);
+}
+
+function spawnNote(n){
+  n.spawned=true;
+  const hole=document.querySelector(`.hole[data-i="${n.hole}"]`);
+  const clip=hole.querySelector('.clip');
+  const stack=document.createElement('div'); stack.className='pangi-stack';
+  for(let k=0;k<n.count;k++){ const p=document.createElement('div'); p.className='pangi '+colorFor(n.hole); p.innerHTML='<div class="eye l"></div><div class="eye r"></div>'; stack.appendChild(p); }
+  clip.appendChild(stack);
+  const ring=document.createElement('div'); ring.className='ring show'; hole.appendChild(ring);
+  n.stackEl=stack; n.ringEl=ring; n.el=hole;
+  requestAnimationFrame(()=>stack.classList.add('up'));
+}
+
+function onTap(hole){
+  if(!playing) return;
+  const now=actx.currentTime;
+  // 해당 칸의 처리 가능한 노트 중 타격시각이 가장 가까운 것
+  let target=null, bestDiff=Infinity;
+  for(const n of notes){
+    if(n.done || !n.spawned || n.hole!==hole) continue;
+    if(now < n.tapTime - W_GOOD) continue;   // 아직 너무 이름
+    const diff=Math.abs(now-n.tapTime);
+    if(diff<bestDiff){ bestDiff=diff; target=n; }
+  }
+  if(!target) return; // 빈 칸/타이밍 밖 터치는 무시(체력 감소 없음)
+
+  // 첫 터치면 타이밍 판정, 이후 연타는 보너스
+  const isFirst = !target.started;
+  target.started=true;
+  let judge;
+  if(isFirst){
+    judge = bestDiff<=W_PERFECT ? 'perfect' : 'good';
+  } else {
+    judge = 'extra';
+  }
+  applyHit(target, judge);
+  // 팡이 한 마리 제거
+  target.remaining--;
+  const last=target.stackEl.querySelector('.pangi'); if(last) last.remove();
+  if(target.el){ target.el.classList.remove('flash'); void target.el.offsetWidth; target.el.classList.add('flash'); }
+  hitPing();
+  if(target.remaining<=0){ clearNote(target, true); }
+}
+
+function applyHit(n, judge){
+  if(judge==='perfect'){ score+=SCORE.perfect; cPerfect++; combo++; popJudge(n,'PERFECT','perfect'); }
+  else if(judge==='good'){ score+=SCORE.good; cGood++; combo++; popJudge(n,'GOOD','good'); }
+  else { score+=SCORE.extra; combo++; popJudge(n,'+'+SCORE.extra,'good'); } // 연타 보너스
+  // 콤보 보너스
+  score += Math.floor(combo/10)*5;
+  maxCombo=Math.max(maxCombo,combo);
+  updateHUD();
+}
+
+function failNote(n){
+  // 윈도우 내 안 친 팡이 수만큼 MISS (체력 감소 없음, 콤보만 끊김)
+  const missed=n.remaining;
+  if(missed>0){ cMiss+=missed; combo=0; popJudge(n,'MISS','miss'); missThud(); }
+  clearNote(n, false);
+  updateHUD();
+}
+
+function clearNote(n, success){
+  n.done=true;
+  if(n.ringEl) n.ringEl.remove();
+  if(n.stackEl){ n.stackEl.classList.remove('up'); n.stackEl.classList.add('retract'); const s=n.stackEl; setTimeout(()=>s.remove(),200); }
+}
+
+function popJudge(n,text,cls){
+  if(!n.el) return;
+  const p=document.createElement('div'); p.className='judge-pop judge-'+cls; p.textContent=text; n.el.appendChild(p); setTimeout(()=>p.remove(),500);
+}
+
+function updateHUD(){
+  document.getElementById('scoreBig').textContent=score.toLocaleString();
+  document.getElementById('comboNum').textContent=combo;
+  const maxScore=totalTaps*SCORE.perfect || 1;
+  const acc=Math.min(100, score/maxScore*100);
+  document.getElementById('accLine').textContent='정확도 '+acc.toFixed(1)+'%';
+}
+
+async function endSong(){
+  playing=false;
+  if(schedulerId){ clearInterval(schedulerId); schedulerId=null; }
+  if(rafId) cancelAnimationFrame(rafId);
+  // 결과 화면
+  const maxScore=totalTaps*SCORE.perfect || 1;
+  const acc=Math.min(100, score/maxScore*100);
+  const grade = acc>=95?'S':acc>=85?'A':acc>=70?'B':acc>=50?'C':'D';
+  const gradeColor = {S:'#ffce4a',A:'#46d17e',B:'#46d1d1',C:'#a8b8e6',D:'#ff6fa5'}[grade];
+  const ov=document.createElement('div'); ov.className='overlay'; ov.id='resOverlay';
+  ov.innerHTML=`<div class="modal">
+    <h2>🎉 결과</h2>
+    <div class="res-grade" style="color:${gradeColor}">${grade}</div>
+    <div class="res-score">${score.toLocaleString()}</div>
+    <div class="res-stats">
+      <div class="st p">PERFECT<b>${cPerfect}</b></div>
+      <div class="st g">GOOD<b>${cGood}</b></div>
+      <div class="st m">MISS<b>${cMiss}</b></div>
+      <div class="st">MAX COMBO<b>${maxCombo}</b></div>
+    </div>
+    <div class="new-best hidden" id="newBest">🎉 신기록 달성!</div>
+    <div class="res-rank" id="resRank">정확도 ${acc.toFixed(1)}%</div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goHome()">랭킹 보기</button>
+      <button class="btn gold" onclick="retry()">다시 도전</button>
+    </div>
+  </div>`;
+  document.getElementById('game').appendChild(ov);
+  tone(actx.currentTime,880,0.25,0.4,'triangle');
+  // 서버 등록
+  try{
+    const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:me.nickname,score,mode:MODE})});
+    const d=await r.json();
+    if(d.ok){
+      if(d.isBest) document.getElementById('newBest').classList.remove('hidden');
+      document.getElementById('resRank').innerHTML=`정확도 ${acc.toFixed(1)}% · 현재 <b>${d.myRank}위</b> · 최고점 ${d.best.toLocaleString()}`;
+      renderRank(d.leaderboard,d.leaderboard.length);
+    }
+  }catch(e){ document.getElementById('resRank').textContent='서버 등록 실패 (오프라인)'; }
+}
+
+function goHome(){ document.getElementById('resOverlay')?.remove(); document.getElementById('game').classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); loadLeaderboard(); }
+function retry(){ document.getElementById('resOverlay')?.remove(); startGame(); }
+
+/* 도움말 */
+function openHelp(){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='helpOverlay';
+  ov.innerHTML=`<div class="modal" style="max-height:84vh;overflow-y:auto;">
+    <h2>📖 플레이 방법</h2>
+    <div class="help-step"><div class="n">1</div><div class="txt"><b>노래 박자</b>에 맞춰 9개 칸에서 팡이가 순서대로 튀어나와요.</div></div>
+    <div class="help-step"><div class="n">2</div><div class="txt">팡이를 감싸는 <b>파란 링</b>이 점점 줄어들어요. 링이 팡이 크기에 <b>딱 맞는 순간</b> 터치하면 <b style="color:#ffce4a">PERFECT</b>!</div></div>
+    <div class="help-step"><div class="n">3</div><div class="txt">타이밍이 살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. 단, <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
+    <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b> 나오면, 나온 수만큼 <b>연달아 터치</b>하세요!</div></div>
+    <div class="help-step"><div class="n">5</div><div class="txt">콤보를 길게 이어갈수록 보너스 점수 UP. 최종 점수와 등급이 <b>리듬 랭킹</b>에 반영돼요.</div></div>
+    <div class="btn-row"><button class="btn primary" onclick="document.getElementById('helpOverlay').remove()">확인</button></div>
+  </div>`;
+  document.querySelector('.app').appendChild(ov);
+}
+
+let toastT;
+function toast(m){ const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2000); }
+setInterval(()=>{ if(!document.getElementById('home').classList.contains('hidden')) loadLeaderboard(); }, 12000);
+</script>
+</body>
+</html>
