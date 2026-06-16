@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>팡이를 잡아라! 🕳️</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+  :root{--bg1:#2b1b4d;--gold:#ffce4a;--gold2:#ff9d2e;--green:#46d17e;--panel:#3a2566;--panel2:#241541;--muted:#b9a8d6;--ink:#221033;}
+  html,body{height:100%;}
+  body{background:radial-gradient(circle at 50% 0%,#5a3a99,var(--bg1) 60%,#18102e);display:flex;align-items:center;justify-content:center;min-height:100vh;color:#fff;overflow:hidden;}
+  .app{width:min(440px,100vw);height:100vh;max-height:900px;position:relative;display:flex;flex-direction:column;}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;}
+  .hidden{display:none!important;}
+
+  /* ===== 닉네임 입장 ===== */
+  #lobby{align-items:center;justify-content:center;padding:24px;text-align:center;}
+  .logo{font-size:40px;font-weight:900;text-shadow:0 4px 0 #7a2d9c,0 6px 10px rgba(0,0,0,.4);margin-bottom:6px;}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:28px;}
+  .pangi-demo{display:flex;gap:14px;margin-bottom:30px;}
+  .demo-dot{width:54px;height:54px;border-radius:50%;position:relative;animation:wobble 1.4s ease-in-out infinite;}
+  .demo-dot:nth-child(2){animation-delay:.2s}.demo-dot:nth-child(3){animation-delay:.4s}
+  @keyframes wobble{0%,100%{transform:rotate(-5deg) translateY(0)}50%{transform:rotate(5deg) translateY(-6px)}}
+  .demo-dot.white{background:radial-gradient(circle at 38% 30%,#fff,#9a90bb);}
+  .demo-dot.black{background:radial-gradient(circle at 38% 30%,#5a5070,#100b1c);}
+  .demo-dot.gold{background:radial-gradient(circle at 38% 30%,#fff3c0,#e08a18);box-shadow:0 0 16px rgba(255,206,74,.7);}
+  .demo-dot .e{position:absolute;top:34%;width:11px;height:13px;background:#fff;border-radius:50%;}
+  .demo-dot .e.l{left:26%}.demo-dot .e.r{right:26%}
+  .demo-dot .e::after{content:'';position:absolute;top:32%;left:28%;width:5px;height:6px;background:#111;border-radius:50%;}
+  .nick-input{width:100%;max-width:300px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;font-size:17px;text-align:center;font-weight:700;margin-bottom:14px;}
+  .nick-input:focus{outline:none;border-color:var(--gold);}
+  .btn{padding:15px 20px;border:none;border-radius:14px;font-weight:900;font-size:16px;cursor:pointer;transition:.1s;}
+  .btn:active{transform:translateY(3px);}
+  .btn.primary{background:linear-gradient(180deg,#7be3a1,var(--green));color:#0a3a1f;box-shadow:0 5px 0 #2c9c58;width:100%;max-width:300px;}
+  .btn.gold{background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);box-shadow:0 4px 0 #b86a12;}
+  .btn.ghost{background:var(--panel);color:#fff;border:1px solid rgba(255,255,255,.2);}
+  .btn:active{box-shadow:none;}
+
+  /* ===== 헤더 ===== */
+  .topbar{padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between;}
+  .title{font-size:20px;font-weight:900;text-shadow:0 3px 0 #7a2d9c;display:flex;gap:6px;align-items:center;}
+  .me-chip{background:var(--panel2);padding:6px 12px;border-radius:20px;font-size:12px;color:var(--muted);}
+  .me-chip b{color:#fff;}
+  .help-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);font-weight:900;font-size:17px;box-shadow:0 3px 0 #b86a12;}
+
+  /* ===== 랭킹 (홈) ===== */
+  #home{padding-bottom:14px;}
+  .home-best{margin:6px 16px 10px;background:linear-gradient(180deg,#43296e,#2a1a4a);border-radius:16px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,.1);}
+  .home-best .lbl{font-size:12px;color:var(--muted);}
+  .home-best .v{font-size:30px;font-weight:900;color:var(--gold);}
+  .home-best .rk{font-size:13px;color:#fff;margin-top:2px;}
+  .rank-wrap{flex:1;margin:0 16px;background:var(--panel2);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);}
+  .rank-head{padding:10px 14px;font-size:13px;font-weight:800;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;}
+  .rank-list{flex:1;overflow-y:auto;}
+  .rank-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+  .rank-row.me{background:rgba(255,206,74,.14);}
+  .rk{width:26px;text-align:center;font-weight:900;color:var(--muted);}
+  .rk.top1{color:#ffce4a}.rk.top2{color:#d9d9ec}.rk.top3{color:#e2935a}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7a55c0,#4a2c7a);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid rgba(255,255,255,.15);}
+  .badge{font-size:14px;width:18px;}
+  .nick{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .score{font-weight:900;font-variant-numeric:tabular-nums;}
+  .reward{font-size:16px;width:22px;text-align:center;}
+  .play-area{padding:12px 16px 18px;display:flex;gap:10px;}
+  .play-btn{flex:1;padding:16px;border:none;border-radius:18px;cursor:pointer;background:linear-gradient(180deg,#7be3a1,var(--green));color:#0a3a1f;font-size:18px;font-weight:900;box-shadow:0 5px 0 #2c9c58;}
+  .play-btn:active{transform:translateY(4px);box-shadow:none;}
+  .refresh-btn{width:54px;border:none;border-radius:18px;background:var(--panel);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 5px 0 #1c1130;}
+  .refresh-btn:active{transform:translateY(4px);box-shadow:none;}
+
+  /* ===== 게임 ===== */
+  #game{background:radial-gradient(circle at 50% 30%,#3d2a66,#18102e);}
+  .game-top{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+  .game-timer{background:var(--panel2);padding:6px 14px;border-radius:20px;font-size:15px;font-weight:900;color:var(--gold);}
+  .catch-count{text-align:center;font-size:14px;color:var(--muted);}
+  .catch-count b{color:#fff;font-size:18px;}
+  .live-score{text-align:center;font-size:13px;color:var(--muted);margin-top:2px;}
+  .live-score b{color:var(--gold);font-size:16px;}
+  .grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:min(340px,86vw);}
+  .hole{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#1c1230 40%,#0d0820 100%);box-shadow:inset 0 8px 18px rgba(0,0,0,.8),inset 0 -3px 6px rgba(120,80,180,.25);position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;}
+  .hole::after{content:'';position:absolute;left:8%;right:8%;top:6%;height:30%;border-radius:50%;background:radial-gradient(ellipse at 50% 0%,rgba(0,0,0,.6),transparent 70%);}
+  .pangi-stack{position:absolute;bottom:-110%;display:flex;transition:bottom .28s cubic-bezier(.34,1.56,.64,1);cursor:pointer;padding-bottom:6%;}
+  .pangi-stack.up{bottom:4%;}
+  .pangi-stack.caught{bottom:-120%;transition:bottom .2s ease-in;}
+  .pangi{width:46px;height:46px;border-radius:50%;position:relative;margin:0 -7px;box-shadow:0 4px 8px rgba(0,0,0,.4);animation:wobble 1.2s ease-in-out infinite;}
+  .pangi.white{background:radial-gradient(circle at 38% 30%,#fff,#c9c2dd 75%,#9a90bb);}
+  .pangi.black{background:radial-gradient(circle at 38% 30%,#5a5070,#211a33 75%,#100b1c);}
+  .pangi.gold{background:radial-gradient(circle at 38% 30%,#fff3c0,#ffce4a 60%,#e08a18);box-shadow:0 0 14px rgba(255,206,74,.7);}
+  .pangi .eye{position:absolute;top:34%;width:10px;height:12px;background:#fff;border-radius:50%;}
+  .pangi .eye.l{left:26%}.pangi .eye.r{right:26%}
+  .pangi .eye::after{content:'';position:absolute;top:32%;left:28%;width:4px;height:5px;background:#111;border-radius:50%;}
+  .score-pop{position:absolute;font-weight:900;font-size:20px;color:var(--gold);pointer-events:none;animation:floatUp .7s ease-out forwards;text-shadow:0 2px 4px #000;}
+  @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translateY(-40px) scale(1.2)}}
+
+  .start-fx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;pointer-events:none;}
+  .star-text{font-size:52px;font-weight:900;text-shadow:0 0 20px var(--gold),0 4px 0 var(--gold2);transform:scale(0);animation:starPop 1s ease-out forwards;}
+  @keyframes starPop{0%{transform:scale(0) rotate(-30deg);opacity:0}35%{transform:scale(1.3) rotate(8deg);opacity:1}60%{transform:scale(1) rotate(0);opacity:1}100%{transform:scale(1.05);opacity:0}}
+  .star-burst{position:absolute;font-size:28px;animation:burst .9s ease-out forwards;}
+  @keyframes burst{0%{opacity:0;transform:scale(0)}30%{opacity:1}100%{opacity:0;transform:scale(1.6) translateY(-30px)}}
+
+  /* ===== 오버레이/모달 ===== */
+  .overlay{position:absolute;inset:0;background:rgba(10,6,24,.82);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:40;padding:20px;}
+  .modal{width:100%;max-width:340px;background:linear-gradient(180deg,#43296e,#2a1a4a);border-radius:22px;padding:22px;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 50px rgba(0,0,0,.6);}
+  .modal h2{text-align:center;font-size:20px;margin-bottom:14px;color:var(--gold);}
+  .slot{display:flex;justify-content:center;gap:6px;margin:10px 0 6px;}
+  .reel{width:44px;height:62px;background:#140d28;border-radius:10px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 4px 8px rgba(0,0,0,.6);}
+  .reel .strip{position:absolute;left:0;width:100%;text-align:center;}
+  .reel .strip div{height:62px;line-height:62px;font-size:34px;font-weight:900;}
+  .slot-label{text-align:center;font-size:13px;color:var(--muted);margin:8px 0;}
+  .result-rank{text-align:center;font-size:15px;margin:10px 0;}
+  .result-rank b{color:var(--gold);font-size:22px;}
+  .new-best{text-align:center;color:var(--green);font-weight:900;font-size:14px;margin-bottom:8px;animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:.5}}
+  .btn-row{display:flex;gap:10px;margin-top:6px;}
+  .btn-row .btn{flex:1;}
+
+  .help-step{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start;}
+  .help-step .n{width:25px;height:25px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .help-step .txt{font-size:13px;line-height:1.5;color:#e6dcff;}
+  .help-step .txt b{color:var(--gold);}
+  .legend{display:flex;justify-content:space-around;background:var(--panel2);border-radius:12px;padding:12px;margin:8px 0 14px;}
+  .leg{text-align:center;font-size:11px;color:var(--muted);}
+  .leg .d{width:32px;height:32px;border-radius:50%;margin:0 auto 5px;}
+  .leg .d.white{background:radial-gradient(circle at 38% 30%,#fff,#9a90bb)}
+  .leg .d.black{background:radial-gradient(circle at 38% 30%,#5a5070,#100b1c)}
+  .leg .d.gold{background:radial-gradient(circle at 38% 30%,#fff3c0,#e08a18);box-shadow:0 0 10px rgba(255,206,74,.6)}
+  .leg b{color:#fff;display:block;font-size:14px;}
+  .toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:10px 18px;border-radius:20px;font-size:13px;z-index:60;opacity:0;transition:.3s;white-space:nowrap;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== 로비 (닉네임 입장) ===== -->
+  <div class="screen" id="lobby">
+    <div class="logo">🕳️ 팡이를 잡아라!</div>
+    <div class="sub">먼지 팡이를 잡고 랭킹에 도전하세요</div>
+    <div class="pangi-demo">
+      <div class="demo-dot white"><div class="e l"></div><div class="e r"></div></div>
+      <div class="demo-dot black"><div class="e l"></div><div class="e r"></div></div>
+      <div class="demo-dot gold"><div class="e l"></div><div class="e r"></div></div>
+    </div>
+    <input class="nick-input" id="nickInput" maxlength="12" placeholder="닉네임을 입력하세요" autocomplete="off">
+    <button class="btn primary" onclick="enter()">입장하기 ▶</button>
+  </div>
+
+  <!-- ===== 홈 (랭킹) ===== -->
+  <div class="screen hidden" id="home">
+    <div class="topbar">
+      <div class="title">🕳️ 팡이를 잡아라!</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="me-chip">👤 <b id="meNick">-</b></span>
+        <button class="help-btn" onclick="openHelp()">?</button>
+      </div>
+    </div>
+    <div class="home-best">
+      <div class="lbl">내 최고 점수</div>
+      <div class="v" id="myBest">0</div>
+      <div class="rk" id="myRankLine">랭킹에 도전해보세요!</div>
+    </div>
+    <div class="rank-wrap">
+      <div class="rank-head"><span>🏆 실시간 랭킹</span><span id="totalPlayers">0명 참가</span></div>
+      <div class="rank-list" id="rankList"><div style="padding:30px;text-align:center;color:var(--muted)">불러오는 중...</div></div>
+    </div>
+    <div class="play-area">
+      <button class="play-btn" onclick="startGame()">🔨 팡이 잡기 시작</button>
+      <button class="refresh-btn" onclick="loadLeaderboard()" title="랭킹 새로고침">🔄</button>
+    </div>
+  </div>
+
+  <!-- ===== 게임 ===== -->
+  <div class="screen hidden" id="game">
+    <div class="game-top">
+      <div class="title" style="font-size:16px;">🕳️ 팡이 잡기</div>
+      <div class="game-timer" id="gameTimer">⏱ 10.0</div>
+    </div>
+    <div class="catch-count">잡은 팡이 <b id="caughtNum">0</b> / <span id="totalNum">0</span></div>
+    <div class="live-score">현재 점수 <b id="liveScore">0</b></div>
+    <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+    <div class="start-fx hidden" id="startFx"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 상태 ============ */
+let me = { nickname: '', best: 0 };
+const PANGI = { white:{score:10}, black:{score:20}, gold:{score:40} };
+
+/* ============ 입장 ============ */
+function enter(){
+  const v = document.getElementById('nickInput').value.trim();
+  if(v.length < 1){ toast('닉네임을 입력해주세요'); return; }
+  me.nickname = v;
+  document.getElementById('meNick').textContent = v;
+  localStorage.setItem('pangi_nick', v);
+  document.getElementById('lobby').classList.add('hidden');
+  document.getElementById('home').classList.remove('hidden');
+  loadLeaderboard();
+}
+document.getElementById('nickInput').addEventListener('keydown', e=>{ if(e.key==='Enter') enter(); });
+// 이전 닉네임 복원
+const saved = localStorage.getItem('pangi_nick'); if(saved) document.getElementById('nickInput').value = saved;
+
+/* ============ 랭킹 로드 ============ */
+async function loadLeaderboard(){
+  try{
+    const r = await fetch('/api/leaderboard');
+    const d = await r.json();
+    renderRank(d.leaderboard, d.total);
+  }catch(e){ toast('서버에 연결할 수 없습니다'); }
+}
+function renderRank(lb, total){
+  document.getElementById('totalPlayers').textContent = (total||lb.length)+'명 참가';
+  const me_entry = lb.find(x=>x.nickname===me.nickname);
+  if(me_entry){
+    me.best = me_entry.score;
+    document.getElementById('myBest').textContent = me_entry.score.toLocaleString();
+    document.getElementById('myRankLine').textContent = `현재 ${me_entry.rank}위 🏅`;
+  }
+  const avatars=['🦊','🐰','🐻','🐱','🐸','🐧','🐼','🐯','🦁','🐨','🐹','🐵'];
+  const list = document.getElementById('rankList');
+  if(!lb.length){ list.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted)">아직 기록이 없어요. 첫 도전자가 되어보세요!</div>'; return; }
+  list.innerHTML = lb.map((r,i)=>{
+    const rkCls = r.rank===1?'top1':r.rank===2?'top2':r.rank===3?'top3':'';
+    const badge = r.rank===1?'👑':r.rank===2?'🥈':r.rank===3?'🥉':r.rank<=10?'⭐':'';
+    const reward = r.rank===1?'🎁':r.rank<=3?'📦':r.rank<=10?'🎀':'';
+    const av = avatars[(r.nickname.charCodeAt(0)||0)%avatars.length];
+    return `<div class="rank-row ${r.nickname===me.nickname?'me':''}">
+      <div class="rk ${rkCls}">${r.rank}</div>
+      <div class="avatar">${av}</div>
+      <div class="badge">${badge}</div>
+      <div class="nick">${escapeHtml(r.nickname)}</div>
+      <div class="score">${r.score.toLocaleString()}</div>
+      <div class="reward">${reward}</div>
+    </div>`;
+  }).join('');
+}
+function escapeHtml(s){ return s.replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+/* ============ 사운드 ============ */
+let actx;
+function ctx(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+function whistle(){
+  const c=ctx(),o=c.createOscillator(),g=c.createGain(); o.type='triangle';o.connect(g);g.connect(c.destination);
+  const t=c.currentTime; o.frequency.setValueAtTime(1800,t); o.frequency.linearRampToValueAtTime(2600,t+.15); o.frequency.linearRampToValueAtTime(2000,t+.3);
+  g.gain.setValueAtTime(.18,t); g.gain.exponentialRampToValueAtTime(.001,t+.45); o.start(t); o.stop(t+.45);
+}
+function blip(f=600){ const c=ctx(),o=c.createOscillator(),g=c.createGain(); o.type='square';o.connect(g);g.connect(c.destination); const t=c.currentTime;o.frequency.value=f; g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.12);o.start(t);o.stop(t+.12); }
+
+/* ============ 게임 ============ */
+let gameTimer, caught, total, accScore;
+function startGame(){
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  const fx=document.getElementById('startFx'); fx.classList.remove('hidden');
+  fx.innerHTML='<div class="star-text">⭐ STAR! ⭐</div>';
+  for(let i=0;i<8;i++){ const b=document.createElement('div');b.className='star-burst';b.textContent='✨'; const a=Math.PI*2/8*i; b.style.left=(50+Math.cos(a)*30)+'%';b.style.top=(50+Math.sin(a)*30)+'%';b.style.animationDelay=(i*.03)+'s';fx.appendChild(b); }
+  whistle();
+  setTimeout(()=>{ fx.classList.add('hidden'); fx.innerHTML=''; spawnPangi(); }, 1000);
+}
+function spawnPangi(){
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  const idx=[...Array(9).keys()].sort(()=>Math.random()-.5).slice(0,5);
+  caught=0; total=0; accScore=0;
+  for(let i=0;i<9;i++){ const h=document.createElement('div');h.className='hole';grid.appendChild(h); }
+  idx.forEach((hi,order)=>{
+    const hole=grid.children[hi];
+    const count=Math.random()<0.25?(Math.random()<0.5?3:2):1;
+    const stack=document.createElement('div'); stack.className='pangi-stack'; let sc=0;
+    for(let k=0;k<count;k++){ const r=Math.random();const t=r<0.5?'white':r<0.85?'black':'gold'; sc+=PANGI[t].score;
+      const p=document.createElement('div');p.className='pangi '+t;p.innerHTML='<div class="eye l"></div><div class="eye r"></div>';p.style.animationDelay=(Math.random()*.5)+'s';stack.appendChild(p); }
+    stack.dataset.score=sc; total+=count;
+    setTimeout(()=>stack.classList.add('up'), 250+order*220+Math.random()*300);
+    stack.addEventListener('click',()=>catchPangi(stack,hole),{once:true});
+    hole.appendChild(stack);
+  });
+  document.getElementById('totalNum').textContent=total;
+  document.getElementById('caughtNum').textContent=0;
+  document.getElementById('liveScore').textContent=0;
+  let tleft=10.0; document.getElementById('gameTimer').textContent='⏱ '+tleft.toFixed(1);
+  clearInterval(gameTimer);
+  gameTimer=setInterval(()=>{ tleft-=0.1; document.getElementById('gameTimer').textContent='⏱ '+Math.max(0,tleft).toFixed(1); if(tleft<=0){clearInterval(gameTimer);revealScore();} },100);
+}
+function catchPangi(stack,hole){
+  if(stack.classList.contains('caught'))return;
+  blip(900);
+  const sc=parseInt(stack.dataset.score); accScore+=sc;
+  const n=stack.querySelectorAll('.pangi').length; caught+=n;
+  document.getElementById('caughtNum').textContent=caught;
+  document.getElementById('liveScore').textContent=accScore.toLocaleString();
+  const pop=document.createElement('div');pop.className='score-pop';pop.textContent='+'+sc;pop.style.left='30%';pop.style.top='30%';hole.appendChild(pop);setTimeout(()=>pop.remove(),700);
+  stack.classList.remove('up');stack.classList.add('caught');
+  if(caught>=total){ clearInterval(gameTimer); setTimeout(revealScore,450); }
+}
+
+/* ============ 점수 공개 → 서버 등록 ============ */
+function revealScore(){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='scoreOverlay';
+  ov.innerHTML=`<div class="modal">
+    <h2>🎰 점수 공개!</h2>
+    <div class="slot" id="slot"></div>
+    <div class="slot-label" id="slotLabel">두구두구두구...</div>
+    <div id="resultArea" class="hidden">
+      <div class="new-best hidden" id="newBest">🎉 신기록 달성!</div>
+      <div class="result-rank" id="resultRank"></div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="goHome()">랭킹 보기</button>
+        <button class="btn primary" onclick="startGameAgain()">다시 도전</button>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('game').appendChild(ov);
+  const digits=String(accScore).padStart(5,'0').split('');
+  const slot=document.getElementById('slot');
+  slot.innerHTML=digits.map(()=>'<div class="reel"><div class="strip"></div></div>').join('');
+  slot.querySelectorAll('.reel').forEach((reel,di)=>{
+    const strip=reel.querySelector('.strip'); let h='';for(let r=0;r<20;r++)h+=`<div>${Math.floor(Math.random()*10)}</div>`; h+=`<div>${digits[di]}</div>`;strip.innerHTML=h;
+    strip.style.transition='none';strip.style.top='0px';
+    setTimeout(()=>{ strip.style.transition=`top ${1.2+di*.35}s cubic-bezier(.2,.8,.2,1)`; strip.style.top=`-${20*62}px`; blip(500+di*80); },50);
+  });
+  const spin=1.2+(digits.length-1)*.35+.3;
+  setTimeout(async ()=>{
+    document.getElementById('slotLabel').textContent=`✨ ${accScore.toLocaleString()}점!`;
+    document.getElementById('resultArea').classList.remove('hidden');
+    blip(1200);
+    // 서버 등록
+    try{
+      const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:me.nickname,score:accScore})});
+      const d=await r.json();
+      if(d.ok){
+        if(d.isBest){ document.getElementById('newBest').classList.remove('hidden'); }
+        document.getElementById('resultRank').innerHTML = `현재 랭킹 <b>${d.myRank}위</b> · 최고점 ${d.best.toLocaleString()}점`;
+        renderRank(d.leaderboard, d.leaderboard.length);
+      }
+    }catch(e){ document.getElementById('resultRank').textContent='서버 등록 실패 (오프라인)'; }
+  }, spin*1000);
+}
+function goHome(){ document.getElementById('scoreOverlay')?.remove(); document.getElementById('game').classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); loadLeaderboard(); }
+function startGameAgain(){ document.getElementById('scoreOverlay')?.remove(); startGame(); }
+
+/* ============ 도움말 ============ */
+function openHelp(){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='helpOverlay';
+  ov.innerHTML=`<div class="modal" style="max-height:84vh;overflow-y:auto;">
+    <h2>📖 게임 방법</h2>
+    <div class="help-step"><div class="n">1</div><div class="txt"><b>팡이 잡기 시작</b>을 누르면 호루라기와 함께 게임이 시작돼요.</div></div>
+    <div class="help-step"><div class="n">2</div><div class="txt">9개 구멍 중 <b>5곳</b>에서 팡이가 무작위로 튀어나와요. <b>순서 상관없이</b> 모두 터치!</div></div>
+    <div class="help-step"><div class="n">3</div><div class="txt">한 구멍에서 <b>2~3마리</b>가 함께 나오기도 해요. 색이 진할수록 고득점!</div></div>
+    <div class="legend">
+      <div class="leg"><div class="d white"></div>하양<b>10점</b></div>
+      <div class="leg"><div class="d black"></div>검정<b>20점</b></div>
+      <div class="leg"><div class="d gold"></div>황금<b>40점</b></div>
+    </div>
+    <div class="help-step"><div class="n">4</div><div class="txt">제한시간 <b>10초</b> 안에 최대한 많이 잡으세요. 모두 잡으면 즉시 점수 공개!</div></div>
+    <div class="help-step"><div class="n">5</div><div class="txt">최고 점수가 <b>실시간 랭킹</b>에 자동 반영돼요. 다른 유저들과 경쟁해보세요!</div></div>
+    <div class="btn-row"><button class="btn primary" onclick="document.getElementById('helpOverlay').remove()">확인</button></div>
+  </div>`;
+  document.querySelector('.app').appendChild(ov);
+}
+
+/* ============ 토스트 ============ */
+let toastT;
+function toast(m){ const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2000); }
+
+/* 홈에서 주기적으로 랭킹 갱신 */
+setInterval(()=>{ if(!document.getElementById('home').classList.contains('hidden')) loadLeaderboard(); }, 10000);
+</script>
+</body>
+</html>

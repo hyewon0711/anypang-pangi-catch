@@ -1,0 +1,15 @@
+# 런타임 데이터 (플레이어 점수 — 커밋 제외)
+scores.json
+
+# 의존성 (현재 무의존성이라 비어있지만 향후 대비)
+node_modules/
+
+# 로그/임시
+*.log
+npm-debug.log*
+
+# OS/에디터
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,10 @@
+{
+  "name": "pangi-catch-web",
+  "version": "1.0.0",
+  "description": "팡이를 잡아라! - 닉네임 기반 랭킹 웹게임 (무의존성 Node 서버)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT"
+}
