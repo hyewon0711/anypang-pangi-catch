@@ -143,7 +143,7 @@
     </div>
     <input class="nick-input" id="nickInput" maxlength="12" placeholder="닉네임을 입력하세요" autocomplete="off">
     <button class="btn primary" onclick="enter()">입장하기 ▶</button>
-    <div style="margin-top:18px;font-size:13px;"><a href="/rhythm.html" style="color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--muted);">🎵 팡이 리듬 모드</a></div>
+    <div style="margin-top:18px;font-size:13px;"><a href="rhythm.html" style="color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--muted);">🎵 팡이 리듬 모드</a></div>
   </div>
 
   <!-- ===== 홈 (랭킹) ===== -->
@@ -205,13 +205,39 @@ document.getElementById('nickInput').addEventListener('keydown', e=>{ if(e.key==
 // 이전 닉네임 복원
 const saved = localStorage.getItem('pangi_nick'); if(saved) document.getElementById('nickInput').value = saved;
 
+/* ============ 저장소 (서버 없으면 브라우저 localStorage로 폴백) ============ */
+const IS_FILE = location.protocol === 'file:';
+const LS_KEY = 'pangi_scores_v1';
+function lsAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch(e){ return {}; } }
+function lsSave(o){ try{ localStorage.setItem(LS_KEY, JSON.stringify(o)); }catch(e){} }
+function localBoard(mode){
+  const s=(lsAll()[mode])||{};
+  return Object.entries(s).map(([nickname,v])=>({nickname,score:v.score,plays:v.plays||1}))
+    .sort((a,b)=>b.score-a.score).slice(0,100).map((r,i)=>({rank:i+1,...r}));
+}
+function localSubmit(mode,nickname,score){
+  const db=lsAll(); const s=db[mode]||(db[mode]={});
+  const cur=s[nickname]||{score:0,plays:0}; const isBest=score>cur.score;
+  s[nickname]={score:isBest?score:cur.score, plays:(cur.plays||0)+1}; lsSave(db);
+  const lb=localBoard(mode); const mr=(lb.find(r=>r.nickname===nickname)||{}).rank||null;
+  return {ok:true,isBest,best:s[nickname].score,myRank:mr,leaderboard:lb,total:lb.length};
+}
+async function apiLeaderboard(mode){
+  if(IS_FILE) return {ok:true,leaderboard:localBoard(mode),total:localBoard(mode).length};
+  try{ const r=await fetch('/api/leaderboard?mode='+encodeURIComponent(mode)); return await r.json(); }
+  catch(e){ return {ok:true,leaderboard:localBoard(mode),total:localBoard(mode).length}; }
+}
+async function apiScore(payload){
+  const mode=payload.mode||'catch';
+  if(IS_FILE) return localSubmit(mode,payload.nickname,payload.score);
+  try{ const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return await r.json(); }
+  catch(e){ return localSubmit(mode,payload.nickname,payload.score); }
+}
+
 /* ============ 랭킹 로드 ============ */
 async function loadLeaderboard(){
-  try{
-    const r = await fetch('/api/leaderboard');
-    const d = await r.json();
-    renderRank(d.leaderboard, d.total);
-  }catch(e){ toast('서버에 연결할 수 없습니다'); }
+  const d = await apiLeaderboard('catch');
+  renderRank(d.leaderboard, d.total);
 }
 function renderRank(lb, total){
   document.getElementById('totalPlayers').textContent = (total||lb.length)+'명 참가';
@@ -327,10 +353,9 @@ function revealScore(){
     document.getElementById('slotLabel').textContent=`✨ ${accScore.toLocaleString()}점!`;
     document.getElementById('resultArea').classList.remove('hidden');
     blip(1200);
-    // 서버 등록
+    // 점수 등록 (서버 없으면 로컬 저장)
     try{
-      const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:me.nickname,score:accScore})});
-      const d=await r.json();
+      const d=await apiScore({nickname:me.nickname,score:accScore,mode:'catch'});
       if(d.ok){
         if(d.isBest){ document.getElementById('newBest').classList.remove('hidden'); }
         document.getElementById('resultRank').innerHTML = `현재 랭킹 <b>${d.myRank}위</b> · 최고점 ${d.best.toLocaleString()}점`;

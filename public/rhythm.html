@@ -171,7 +171,7 @@
     </div>
     <input class="nick-input" id="nickInput" maxlength="12" placeholder="닉네임을 입력하세요" autocomplete="off">
     <button class="btn primary" style="width:100%;max-width:320px;" onclick="enter()">입장하기 ▶</button>
-    <div class="lobby-links"><a href="/">🕳️ 팡이 잡기 모드</a></div>
+    <div class="lobby-links"><a href="index.html">🕳️ 팡이 잡기 모드</a></div>
   </div>
 
   <!-- ===== 홈 ===== -->
@@ -378,6 +378,34 @@ function selectSong(s){ if(!s)return; curSong=s; BEAT=60/s.bpm; renderSongChips(
 function selectDiff(k){ curDiff=k; renderDiffRow(); updateSelInfo(); loadLeaderboard(); }
 function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${DIFFICULTIES[curDiff].label}`; }
 
+/* 저장소 — 서버 없으면 브라우저 localStorage로 폴백 */
+const IS_FILE = location.protocol === 'file:';
+const LS_KEY = 'pangi_scores_v1';
+function lsAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch(e){ return {}; } }
+function lsSave(o){ try{ localStorage.setItem(LS_KEY, JSON.stringify(o)); }catch(e){} }
+function localBoard(mode){
+  const s=(lsAll()[mode])||{};
+  return Object.entries(s).map(([nickname,v])=>({nickname,score:v.score,plays:v.plays||1}))
+    .sort((a,b)=>b.score-a.score).slice(0,100).map((r,i)=>({rank:i+1,...r}));
+}
+function localSubmit(mode,nickname,score){
+  const db=lsAll(); const s=db[mode]||(db[mode]={});
+  const cur=s[nickname]||{score:0,plays:0}; const isBest=score>cur.score;
+  s[nickname]={score:isBest?score:cur.score, plays:(cur.plays||0)+1}; lsSave(db);
+  const lb=localBoard(mode); const mr=(lb.find(r=>r.nickname===nickname)||{}).rank||null;
+  return {ok:true,isBest,best:s[nickname].score,myRank:mr,leaderboard:lb,total:lb.length};
+}
+async function apiLeaderboardReq(mode){
+  if(IS_FILE) return {ok:true,leaderboard:localBoard(mode),total:localBoard(mode).length};
+  try{ const r=await fetch('/api/leaderboard?mode='+encodeURIComponent(mode)); return await r.json(); }
+  catch(e){ return {ok:true,leaderboard:localBoard(mode),total:localBoard(mode).length}; }
+}
+async function apiScoreReq(payload){
+  if(IS_FILE) return localSubmit(payload.mode,payload.nickname,payload.score);
+  try{ const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return await r.json(); }
+  catch(e){ return localSubmit(payload.mode,payload.nickname,payload.score); }
+}
+
 async function loadLeaderboard(){
   const list=document.getElementById('rankList');
   if(!curSong.ranked){
@@ -385,10 +413,7 @@ async function loadLeaderboard(){
     document.getElementById('myBest').textContent='-'; document.getElementById('myRankLine').textContent='';
     document.getElementById('totalPlayers').textContent='연습 모드'; return;
   }
-  try{
-    const r=await fetch('/api/leaderboard?mode='+encodeURIComponent(modeKey()));
-    const d=await r.json(); renderRank(d.leaderboard,d.total);
-  }catch(e){ toast('서버에 연결할 수 없습니다'); }
+  const d=await apiLeaderboardReq(modeKey()); renderRank(d.leaderboard,d.total);
 }
 function renderRank(lb,total){
   document.getElementById('totalPlayers').textContent=(total||lb.length)+'명 참가';
@@ -687,8 +712,7 @@ async function endSong(){
     return;
   }
   try{
-    const r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:me.nickname,score,mode:modeKey()})});
-    const d=await r.json();
+    const d=await apiScoreReq({nickname:me.nickname,score,mode:modeKey()});
     if(d.ok){
       if(d.isBest) document.getElementById('newBest').classList.remove('hidden');
       document.getElementById('resRank').innerHTML=`정확도 ${acc.toFixed(1)}% · 현재 <b>${d.myRank}위</b> · 최고점 ${d.best.toLocaleString()}`;
