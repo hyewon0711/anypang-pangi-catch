@@ -151,6 +151,7 @@
     <div class="topbar">
       <div class="title">🕳️ 팡이를 잡아라!</div>
       <div style="display:flex;gap:8px;align-items:center;">
+        <button class="help-btn" onclick="backToLobby()" title="로비로 돌아가기">🚪</button>
         <span class="me-chip">👤 <b id="meNick">-</b></span>
         <button class="help-btn" onclick="openHelp()">?</button>
       </div>
@@ -200,6 +201,11 @@ function enter(){
   document.getElementById('lobby').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
   loadLeaderboard();
+}
+function backToLobby(){
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('lobby').classList.remove('hidden');
+  document.getElementById('nickInput').value = me.nickname || '';
 }
 document.getElementById('nickInput').addEventListener('keydown', e=>{ if(e.key==='Enter') enter(); });
 // 이전 닉네임 복원
