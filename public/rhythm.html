@@ -379,7 +379,8 @@ function selectDiff(k){ curDiff=k; renderDiffRow(); updateSelInfo(); loadLeaderb
 function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${DIFFICULTIES[curDiff].label}`; }
 
 /* 저장소 — 서버 없으면 브라우저 localStorage로 폴백 */
-const IS_FILE = location.protocol === 'file:';
+// file:// 또는 정적 호스팅(GitHub Pages 등)이면 서버 대신 브라우저 저장소 사용
+const IS_FILE = location.protocol === 'file:' || /github\.io$/.test(location.hostname);
 const LS_KEY = 'pangi_scores_v1';
 function lsAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch(e){ return {}; } }
 function lsSave(o){ try{ localStorage.setItem(LS_KEY, JSON.stringify(o)); }catch(e){} }
