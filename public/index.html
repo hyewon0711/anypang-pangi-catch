@@ -52,11 +52,8 @@
   .chip.sel{border-color:var(--gold);background:linear-gradient(180deg,#3a4a8a,#26346a);box-shadow:0 0 12px rgba(255,206,74,.35);}
   .chip .c{font-size:22px;line-height:1;}
   .chip .n{font-size:11px;font-weight:700;margin-top:3px;white-space:nowrap;}
+  .chip .d{font-size:9px;color:var(--gold);margin-top:1px;white-space:nowrap;}
   .chip.add{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);border-style:dashed;}
-  .diff-row{display:flex;gap:8px;}
-  .diff-btn{flex:1;padding:9px 0;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:var(--panel);color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:.12s;}
-  .diff-btn .s{display:block;font-size:10px;color:var(--gold);margin-top:1px;}
-  .diff-btn.sel{border-color:var(--gold);background:linear-gradient(180deg,#3a4a8a,#26346a);}
 
   /* ===== 홈 랭킹 ===== */
   .home-best{margin:8px 16px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:14px;padding:10px 14px;font-size:13px;border:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;}
@@ -183,14 +180,12 @@
     </div>
 
     <div class="selectors">
-      <div class="sel-label">🎼 곡 선택</div>
+      <div class="sel-label">🎼 곡 선택 (난이도 고정)</div>
       <div class="song-chips" id="songChips"></div>
-      <div class="sel-label">🎚️ 난이도</div>
-      <div class="diff-row" id="diffRow"></div>
     </div>
 
     <div class="home-best">
-      <span class="sel-info" id="selInfo">팡이 비트 · 보통</span>
+      <span class="sel-info" id="selInfo">재즈 스텝 · 쉬움</span>
       <span class="best-info" id="bestInfo">내 최고 <b id="myBest">0</b> <span id="myRankLine"></span></span>
     </div>
 
@@ -234,58 +229,118 @@ const MULTI_GAP_BEAT = 0.5;     // 연타 팡이 간격(박)
 const SCORE = { perfect:300, good:100 };
 
 /* ------------------------------------------------------------------------
-   곡 목록
+   곡 목록 — 3곡은 실제 음원(mp3)으로, 각 곡의 실측 BPM/오프셋에 맞춰
+   난이도별로 다른 리듬 패턴(chart 타입)이 고정 적용됩니다.
    - kind:'synth'  → WebAudio로 즉석 생성하는 내장곡(파일 불필요)
    - kind:'file'   → 실제 음원. src(서버 경로) 또는 buffer(유저 업로드)
-   실제 mp3를 추가하려면 public/songs/에 파일을 넣고 아래에 한 줄 추가:
-     { id:'mysong', name:'곡이름', cover:'🎵', kind:'file', src:'songs/mysong.mp3',
-       bpm:128, offset:0, lengthBeats:120, ranked:true }
+   - chart: 'walk'(쉬움-매 2박 단타) / 'triplet'(보통-2박당 3연음 트리플렛)
+            / 'swingEighth'(어려움-스윙 8비트+연타) / 'legacy'(구 랜덤 생성기)
+   bpm·offset·lengthBeats는 ffmpeg+numpy 온셋 분석으로 실측한 값입니다.
 ------------------------------------------------------------------------ */
 const SONGS = [
-  { id:'pangibeat', name:'팡이 비트', cover:'🎶', kind:'synth', bpm:120, offset:0, lengthBeats:64, ranked:true },
-  // 예시(파일을 넣으면 활성화):
-  // { id:'demo', name:'데모곡', cover:'🎵', kind:'file', src:'songs/demo.mp3', bpm:128, offset:0, lengthBeats:140, ranked:true },
+  { id:'jazzstep', name:'재즈 스텝', cover:'🎷', kind:'file', src:'songs/jazz-step.mp3',
+    bpm:95.7, offset:0.313, lengthBeats:210, diffKey:'easy', diffLabel:'쉬움', stars:'★☆☆', chart:'walk', ranked:true },
+  { id:'swingthree', name:'셋의 스윙', cover:'🎹', kind:'file', src:'songs/swing-of-three.mp3',
+    bpm:86.1, offset:0.098, lengthBeats:178, diffKey:'normal', diffLabel:'보통', stars:'★★☆', chart:'triplet', ranked:true },
+  { id:'swingbutton', name:'스윙 버튼', cover:'🎺', kind:'file', src:'songs/swing-button.mp3',
+    bpm:152.0, offset:0.154, lengthBeats:400, diffKey:'hard', diffLabel:'어려움', stars:'★★★', chart:'swingEighth', ranked:true },
+  { id:'pangibeat', name:'팡이 비트', cover:'🎶', kind:'synth',
+    bpm:120, offset:0, lengthBeats:64, diffKey:'practice', diffLabel:'연습', stars:'♪', chart:'legacy', ranked:true },
 ];
 
-/* 난이도 프리셋 — 곡 길이에 맞춰 채보를 결정론적으로 생성 */
-const DIFFICULTIES = {
-  easy:   { label:'쉬움',   stars:'★☆☆', step:2, multiChance:0,    maxMulti:1, eighthChance:0 },
-  normal: { label:'보통',   stars:'★★☆', step:1, multiChance:0.18, maxMulti:2, eighthChance:0.12 },
-  hard:   { label:'어려움', stars:'★★★', step:1, multiChance:0.32, maxMulti:3, eighthChance:0.45 },
-};
-
 let curSong = SONGS[0];
-let curDiff = 'normal';
 let BEAT = 60 / curSong.bpm;
 
 function colorFor(hole){ return ['white','black','gold','black','gold','white','gold','white','black'][hole]; }
-function modeKey(){ return `rhythm:${curSong.id}:${curDiff}`; }
+function modeKey(){ return `rhythm:${curSong.id}:${curSong.diffKey}`; }
 
-/* 결정론적 의사난수 (같은 곡·난이도는 항상 같은 채보) */
+/* 결정론적 의사난수 (같은 곡은 항상 같은 채보) */
 function hash01(i){ const x=Math.sin(i*12.9898+78.233)*43758.5453; return x-Math.floor(x); }
 
-/* 채보 생성 */
-function genChart(lengthBeats, diffKey){
-  const D = DIFFICULTIES[diffKey];
-  const chart=[]; const lastHoleBeat={}; const MIN_GAP=3; let seed=0;
-  const pickHole=(beat, base)=>{
+function pickHoleFactory(minGap){
+  const lastHoleBeat={};
+  return (beat, base)=>{
     let hole=Math.floor(hash01(base)*9)%9, guard=0;
-    while(guard<9 && lastHoleBeat[hole]!==undefined && (beat-lastHoleBeat[hole])<MIN_GAP){ hole=(hole+1)%9; guard++; }
+    while(guard<9 && lastHoleBeat[hole]!==undefined && (beat-lastHoleBeat[hole])<minGap){ hole=(hole+1)%9; guard++; }
     lastHoleBeat[hole]=beat; return hole;
   };
+}
+
+/* 쉬움 "재즈 스텝" — 2박마다 한 걸음씩 걷듯 단타만 (연타 없음) */
+function chartWalk(lengthBeats){
+  const chart=[]; const pickHole=pickHoleFactory(4); let seed=100;
+  for(let b=4; b<=lengthBeats-2; b+=2){
+    seed++;
+    chart.push({ b, h:pickHole(b, seed*1.7), c:1 });
+  }
+  return chart;
+}
+
+/* 보통 "셋의 스윙" — 2박을 3등분한 트리플렛(3연음)이 곡 제목 그대로의 리듬 */
+function chartTriplet(lengthBeats){
+  const chart=[]; const pickHole=pickHoleFactory(1.3); let seed=200;
+  for(let g=4; g<=lengthBeats-2; g+=2){
+    for(let k=0;k<3;k++){
+      seed++;
+      const beat=g + k*(2/3);
+      const isLast=(k===2);
+      const c = (isLast && hash01(seed*9.9)<0.3) ? 2 : 1;
+      chart.push({ b:beat, h:pickHole(beat, seed*1.7), c });
+    }
+  }
+  return chart;
+}
+
+/* 어려움 "스윙 버튼" — 매 박 스윙 8비트(롱-숏)로 촘촘하게, 연타도 자주 */
+function chartSwingEighth(lengthBeats){
+  const chart=[]; const pickHole=pickHoleFactory(0.9); let seed=300;
+  for(let b=4; b<=lengthBeats-2; b+=1){
+    seed++;
+    const c1 = hash01(seed*5.1)<0.22 ? (hash01(seed*7.3)<0.35 ? 3 : 2) : 1;
+    chart.push({ b, h:pickHole(b, seed*1.7), c:c1 });
+    if(hash01(seed*11.3) < 0.75){
+      seed++;
+      const c2 = hash01(seed*5.1)<0.15 ? 2 : 1;
+      const b2 = b + 2/3;
+      chart.push({ b:b2, h:pickHole(b2, seed*1.7), c:c2 });
+    }
+  }
+  return chart;
+}
+
+/* 구 버전 랜덤 생성기 — 팡이 비트(연습)·내 MP3 업로드용 */
+const LEGACY_DIFF = {
+  easy:   { step:2, multiChance:0,    maxMulti:1, eighthChance:0 },
+  normal: { step:1, multiChance:0.18, maxMulti:2, eighthChance:0.12 },
+  hard:   { step:1, multiChance:0.32, maxMulti:3, eighthChance:0.45 },
+  practice:{ step:1, multiChance:0.18, maxMulti:2, eighthChance:0.12 },
+  custom: { step:1, multiChance:0.18, maxMulti:2, eighthChance:0.12 },
+};
+function chartLegacy(lengthBeats, diffKey){
+  const D = LEGACY_DIFF[diffKey] || LEGACY_DIFF.normal;
+  const chart=[]; const pickHole=pickHoleFactory(3); let seed=0;
   for(let b=4; b<=lengthBeats-2; b+=D.step){
     seed++;
     const hole=pickHole(b, seed*1.7);
     let c=1;
     if(hash01(seed*3.3) < D.multiChance){ c = (D.maxMulti>=3 && hash01(seed*5.1)<0.4) ? 3 : 2; }
     chart.push({b, h:hole, c});
-    // 어려움: 엇박(반 박) 노트 추가
     if(D.eighthChance>0 && hash01(seed*7.7)<D.eighthChance){
       const h2=pickHole(b+0.5, seed*9.2+1);
       chart.push({b:b+0.5, h:h2, c:1});
     }
   }
   return chart;
+}
+
+/* 곡별 채보 생성 디스패처 */
+function genChartFor(song){
+  switch(song.chart){
+    case 'walk': return chartWalk(song.lengthBeats);
+    case 'triplet': return chartTriplet(song.lengthBeats);
+    case 'swingEighth': return chartSwingEighth(song.lengthBeats);
+    default: return chartLegacy(song.lengthBeats, song.diffKey);
+  }
 }
 
 const MELODY = [523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33];
@@ -354,7 +409,7 @@ function enter(){
   localStorage.setItem('pangi_nick',v);
   document.getElementById('lobby').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
-  renderSongChips(); renderDiffRow(); updateSelInfo(); loadLeaderboard();
+  renderSongChips(); updateSelInfo(); loadLeaderboard();
 }
 function backToLobby(){
   document.getElementById('home').classList.add('hidden');
@@ -367,19 +422,13 @@ const saved=localStorage.getItem('pangi_nick'); if(saved) document.getElementByI
 function renderSongChips(){
   const el=document.getElementById('songChips');
   el.innerHTML = SONGS.map(s=>`<div class="chip ${s.id===curSong.id?'sel':''}" data-sid="${s.id}">
-      <div class="c">${s.cover}</div><div class="n">${escapeHtml(s.name)}</div></div>`).join('')
+      <div class="c">${s.cover}</div><div class="n">${escapeHtml(s.name)}</div><div class="d">${s.diffLabel} ${s.stars}</div></div>`).join('')
     + `<div class="chip add" id="addChip"><div class="c">＋</div><div class="n">내 MP3</div></div>`;
   el.querySelectorAll('.chip[data-sid]').forEach(c=>c.onclick=()=>selectSong(SONGS.find(s=>s.id===c.dataset.sid)));
   document.getElementById('addChip').onclick=pickFile;
 }
-function renderDiffRow(){
-  const el=document.getElementById('diffRow');
-  el.innerHTML = Object.keys(DIFFICULTIES).map(k=>`<button class="diff-btn ${k===curDiff?'sel':''}" data-d="${k}">${DIFFICULTIES[k].label}<span class="s">${DIFFICULTIES[k].stars}</span></button>`).join('');
-  el.querySelectorAll('.diff-btn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
-}
 function selectSong(s){ if(!s)return; curSong=s; BEAT=60/s.bpm; renderSongChips(); updateSelInfo(); loadLeaderboard(); }
-function selectDiff(k){ curDiff=k; renderDiffRow(); updateSelInfo(); loadLeaderboard(); }
-function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${DIFFICULTIES[curDiff].label}`; }
+function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${curSong.diffLabel}`; }
 
 /* 저장소 — 서버 없으면 브라우저 localStorage로 폴백 */
 // file:// 또는 정적 호스팅(GitHub Pages 등)이면 서버 대신 브라우저 저장소 사용
@@ -464,7 +513,8 @@ function askBpm(name, buffer){
     const bpm=Math.max(40,Math.min(300, +document.getElementById('inpBpm').value||120));
     const off=+document.getElementById('inpOff').value||0;
     const lengthBeats=Math.max(16, Math.floor(buffer.duration*bpm/60)-1);
-    const song={ id:'myaudio', name:name.slice(0,14), cover:'🎧', kind:'file', buffer, bpm, offset:off, lengthBeats, ranked:false };
+    const song={ id:'myaudio', name:name.slice(0,14), cover:'🎧', kind:'file', buffer, bpm, offset:off, lengthBeats,
+      diffKey:'custom', diffLabel:'연습', stars:'♪', chart:'legacy', ranked:false };
     const i=SONGS.findIndex(s=>s.id==='myaudio'); if(i>=0) SONGS[i]=song; else SONGS.push(song);
     document.getElementById('bpmOverlay').remove();
     selectSong(song); toast('내 음원이 추가됐어요!');
@@ -484,7 +534,7 @@ function startGame(){
   if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
   document.getElementById('home').classList.add('hidden');
   document.getElementById('game').classList.remove('hidden');
-  document.getElementById('gameSong').textContent=`🎶 ${curSong.name} · ${DIFFICULTIES[curDiff].label}`;
+  document.getElementById('gameSong').textContent=`🎶 ${curSong.name} · ${curSong.diffLabel}`;
   buildGrid();
   score=0;combo=0;maxCombo=0;cPerfect=0;cGood=0;cMiss=0;totalTaps=0;
   updateHUD();
@@ -506,7 +556,7 @@ function pauseGame(){
   const ov=document.createElement('div'); ov.className='overlay'; ov.id='pauseOverlay';
   ov.innerHTML=`<div class="modal">
     <h2>⏸ 일시정지</h2>
-    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;">🎶 ${escapeHtml(curSong.name)} · ${DIFFICULTIES[curDiff].label}</div>
+    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;">🎶 ${escapeHtml(curSong.name)} · ${curSong.diffLabel}</div>
     <button class="btn primary" style="width:100%;margin-bottom:10px;" onclick="resumeGame()">▶ 계속하기</button>
     <div class="btn-row">
       <button class="btn ghost" onclick="restartFromPause()">🔄 처음부터</button>
@@ -567,7 +617,7 @@ function buildGrid(){
 }
 
 function beginSong(){
-  const chart = genChart(curSong.lengthBeats, curDiff);
+  const chart = genChartFor(curSong);
   const GAP = MULTI_GAP_BEAT * BEAT;
   startMusic(); // songStart 설정
   notes = chart.map((n,idx)=>{
@@ -732,7 +782,7 @@ function openHelp(){
   const ov=document.createElement('div');ov.className='overlay';ov.id='helpOverlay';
   ov.innerHTML=`<div class="modal" style="max-height:84vh;overflow-y:auto;">
     <h2>📖 플레이 방법</h2>
-    <div class="help-step"><div class="n">1</div><div class="txt"><b>곡</b>과 <b>난이도</b>(쉬움/보통/어려움)를 고르고 플레이하세요. <b>＋내 MP3</b>로 내 음악도 불러올 수 있어요(연습용).</div></div>
+    <div class="help-step"><div class="n">1</div><div class="txt"><b>곡</b>을 골라 플레이하세요. 곡마다 <b>난이도(쉬움/보통/어려움)</b>와 리듬 패턴이 고정돼 있어요. <b>＋내 MP3</b>로 내 음악도 불러올 수 있어요(연습용).</div></div>
     <div class="help-step"><div class="n">2</div><div class="txt">노래 박자에 맞춰 9칸에서 팡이가 등장하고, 감싼 <b>링이 줄어들어요</b>. 링이 딱 맞는 순간 터치 → <b style="color:#ffce4a">PERFECT</b>!</div></div>
     <div class="help-step"><div class="n">3</div><div class="txt">살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
     <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b>면 <b>링도 마리 수만큼</b> 차례로 닫혀요. 순서대로 탁-탁-탁 연달아 터치!</div></div>
