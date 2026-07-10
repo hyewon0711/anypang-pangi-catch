@@ -210,8 +210,8 @@
           <path d="M140 34 L140 66 L147 59 L152 71 L157 69 L152 57 L162 57 Z" fill="#fff" stroke="#10182f" stroke-width="1.5" stroke-linejoin="round"/>
           <g font-size="12" font-weight="800" text-anchor="middle">
             <rect x="182" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="39" fill="#fff">E</text>
-            <rect x="206" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="39" fill="#fff">F</text>
-            <rect x="182" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="63" fill="#fff">O</text>
+            <rect x="206" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="39" fill="#fff">O</text>
+            <rect x="182" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="63" fill="#fff">F</text>
             <rect x="206" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="63" fill="#fff">K</text>
           </g>
           <text x="120" y="104" text-anchor="middle" font-size="12" fill="var(--muted)">칸 위 숫자가 남은 시간!</text>
@@ -582,8 +582,8 @@ function buildGrid(){
   }
 }
 
-/* 키보드 조작: E(좌상단) F(우상단) O(좌하단) K(우하단) */
-const KEY_HOLE = { e:0, f:1, o:2, k:3 };
+/* 키보드 조작: E(좌상단) O(우상단) F(좌하단) K(우하단) */
+const KEY_HOLE = { e:0, o:1, f:2, k:3 };
 document.addEventListener('keydown', e=>{
   if(e.repeat) return;
   const hole = KEY_HOLE[e.key.toLowerCase()];
