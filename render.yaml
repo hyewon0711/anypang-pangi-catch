@@ -1,0 +1,14 @@
+# Render 배포 설정 (Blueprint)
+# https://render.com → New → Blueprint → 이 저장소 선택 → Apply 하면 자동 구성됩니다.
+services:
+  - type: web
+    name: anypang-pangi-catch
+    runtime: node
+    plan: free                # 무료 티어 (영구 https URL 제공, 15분 미사용 시 절전→첫 접속 ~50초 콜드스타트)
+    buildCommand: ""          # 의존성 없음 — 빌드 불필요
+    startCommand: node server.js
+    autoDeploy: true          # main 브랜치 push 시 자동 재배포
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

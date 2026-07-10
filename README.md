@@ -79,6 +79,25 @@ node server.js
 - 포트 변경: `set PORT=8080 && node server.js`
 - 닉네임 중복: 현재 같은 닉네임 = 같은 플레이어(최고점 갱신). 분리하려면 비밀번호/세션 추가 필요.
 
-## 외부 공개(인터넷 전체)로 확장하려면
-- 클라우드(예: Render, Railway, Fly.io)에 배포하거나
-- `ngrok http 3000` 으로 임시 공개 URL 생성
+## 인터넷에 배포하기 — 누구나 언제든지 접속 (Render, 무료)
+
+내 PC가 꺼져 있어도 항상 접속 가능한 **영구 공개 URL**을 만드는 방법입니다.
+저장소에 `render.yaml`이 포함돼 있어 거의 자동으로 구성됩니다.
+
+1. https://render.com 가입 (GitHub 계정으로 로그인 추천)
+2. 대시보드 → **New +** → **Blueprint**
+3. GitHub 연결 후 저장소 **`hyewon0711/anypang-pangi-catch`** 선택 → **Apply**
+   - `render.yaml`을 읽어 `node server.js`로 자동 실행됩니다 (빌드 불필요)
+4. 배포 완료 후 `https://anypang-pangi-catch.onrender.com` 형태의 **공개 주소**가 생성됩니다.
+   - 이 링크를 누구에게나 공유하면 언제든지 플레이 가능
+   - 리듬 모드: 위 주소 뒤에 `/rhythm.html`
+5. 이후 `git push`로 main에 반영하면 자동 재배포됩니다.
+
+### 주의 (무료 티어 특성)
+- **콜드 스타트**: 15분간 접속이 없으면 절전 → 다음 첫 접속이 ~50초 걸립니다(이후 정상).
+- **점수 초기화**: 무료 티어는 디스크가 임시라 재배포/재시작 시 `scores.json`(랭킹)이 초기화됩니다.
+  - 랭킹을 영구 보존하려면: Render 유료 디스크를 붙이거나, 외부 저장소(무료 DB 등) 연동이 필요합니다. 원하시면 붙여 드립니다.
+
+## 그 밖의 옵션
+- **내 PC만 잠깐 공유**: `cloudflared tunnel --url http://localhost:3000` → `https://xxxx.trycloudflare.com` (PC 켜져 있는 동안만)
+- **같은 네트워크(사내망/Wi-Fi)**: 서버 실행 시 콘솔에 출력되는 `http://<내IP>:3000`
