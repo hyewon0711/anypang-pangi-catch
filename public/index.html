@@ -82,7 +82,7 @@
   .song-name-mini{text-align:center;font-size:12px;color:var(--muted);margin-top:6px;}
 
   .grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:min(360px,90vw);}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:min(280px,70vw);}
   .hole{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#16203e 40%,#0a1228 100%);box-shadow:inset 0 8px 18px rgba(0,0,0,.8),inset 0 -3px 6px rgba(80,110,200,.25);position:relative;overflow:visible;display:flex;align-items:center;justify-content:center;cursor:pointer;}
   .hole .clip{position:absolute;inset:0;border-radius:50%;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;}
   .hole::after{content:'';position:absolute;left:8%;right:8%;top:6%;height:30%;border-radius:50%;background:radial-gradient(ellipse at 50% 0%,rgba(0,0,0,.6),transparent 70%);pointer-events:none;z-index:5;}
@@ -179,7 +179,7 @@
     <div class="help-panel">
       <div class="help-panel-head">📖 플레이 방법</div>
       <div class="help-step"><div class="n">1</div><div class="txt"><b>곡</b>을 골라 플레이하세요. 곡마다 <b>난이도(보통/어려움)</b>와 리듬 패턴이 고정돼 있어요.</div></div>
-      <div class="help-step"><div class="n">2</div><div class="txt">노래 박자에 맞춰 9칸에서 팡이가 등장하고, 감싼 <b>링이 줄어들어요</b>. 링이 딱 맞는 순간 터치 → <b style="color:#ffce4a">PERFECT</b>!</div></div>
+      <div class="help-step"><div class="n">2</div><div class="txt">노래 박자에 맞춰 4칸에서 팡이가 등장하고, 감싼 <b>링이 줄어들어요</b>. 링이 딱 맞는 순간 터치 → <b style="color:#ffce4a">PERFECT</b>!</div></div>
       <div class="help-step"><div class="n">3</div><div class="txt">살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
       <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b>면 <b>링도 마리 수만큼</b> 차례로 닫혀요. 순서대로 탁-탁-탁 연달아 터치!</div></div>
       <div class="help-step"><div class="n">5</div><div class="txt">최종 점수와 등급(S~D)이 <b>곡·난이도별 랭킹</b>에 반영돼요.</div></div>
@@ -234,7 +234,8 @@ const SONGS = [
 let curSong = SONGS[0];
 let BEAT = 60 / curSong.bpm;
 
-function colorFor(hole){ return ['white','black','gold','black','gold','white','gold','white','black'][hole]; }
+const HOLES = 4;
+function colorFor(hole){ return ['white','black','gold','white'][hole]; }
 function modeKey(){ return `rhythm:${curSong.id}:${curSong.diffKey}`; }
 
 /* 결정론적 의사난수 (같은 곡은 항상 같은 채보) */
@@ -243,8 +244,8 @@ function hash01(i){ const x=Math.sin(i*12.9898+78.233)*43758.5453; return x-Math
 function pickHoleFactory(minGap){
   const lastHoleBeat={};
   return (beat, base)=>{
-    let hole=Math.floor(hash01(base)*9)%9, guard=0;
-    while(guard<9 && lastHoleBeat[hole]!==undefined && (beat-lastHoleBeat[hole])<minGap){ hole=(hole+1)%9; guard++; }
+    let hole=Math.floor(hash01(base)*HOLES)%HOLES, guard=0;
+    while(guard<HOLES && lastHoleBeat[hole]!==undefined && (beat-lastHoleBeat[hole])<minGap){ hole=(hole+1)%HOLES; guard++; }
     lastHoleBeat[hole]=beat; return hole;
   };
 }
@@ -502,7 +503,7 @@ function quitGame(){
 
 function buildGrid(){
   const grid=document.getElementById('grid'); grid.innerHTML='';
-  for(let i=0;i<9;i++){
+  for(let i=0;i<HOLES;i++){
     const hole=document.createElement('div'); hole.className='hole'; hole.dataset.i=i;
     hole.innerHTML='<div class="clip"></div>';
     hole.addEventListener('pointerdown',e=>{ e.preventDefault(); onTap(i); });
