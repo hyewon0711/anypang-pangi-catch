@@ -9,7 +9,7 @@
   :root{--bg1:#1b2b4d;--gold:#ffce4a;--gold2:#ff9d2e;--green:#46d17e;--panel:#26346a;--panel2:#141f3f;--muted:#a8b8e6;--ink:#10182f;--pink:#ff6fa5;--cyan:#46d1d1;}
   html,body{height:100%;}
   body{background:radial-gradient(circle at 50% 0%,#3a4a99,var(--bg1) 60%,#0e1430);display:flex;align-items:center;justify-content:center;min-height:100vh;color:#fff;overflow:hidden;}
-  .app{width:min(440px,100vw);height:100vh;max-height:900px;position:relative;display:flex;flex-direction:column;}
+  .app{width:min(960px,100vw,177.78vh);aspect-ratio:16/9;position:relative;display:flex;flex-direction:column;overflow:hidden;}
   .screen{position:absolute;inset:0;display:flex;flex-direction:column;}
   .hidden{display:none!important;}
   .btn{padding:15px 20px;border:none;border-radius:14px;font-weight:900;font-size:16px;cursor:pointer;transition:.1s;}
@@ -44,27 +44,30 @@
   .me-chip b{color:#fff;}
   .help-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);font-weight:900;font-size:17px;box-shadow:0 3px 0 #b86a12;}
 
-  /* ===== 선택 UI (곡/난이도) ===== */
-  .selectors{padding:2px 16px 0;}
-  .sel-label{font-size:11px;color:var(--muted);font-weight:700;margin:8px 2px 5px;}
-  .song-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;}
+  /* ===== 홈 (16:9, 스크롤 없이 한 화면) ===== */
+  .home-main{flex:1;display:flex;gap:14px;padding:0 16px 14px;min-height:0;}
+  .home-side{width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;min-height:0;}
+
+  /* ===== 선택 UI (곡) ===== */
+  .sel-label{font-size:11px;color:var(--muted);font-weight:700;margin:0 2px 5px;}
+  .song-chips{display:flex;gap:8px;flex-wrap:wrap;}
   .chip{flex:0 0 auto;min-width:82px;background:var(--panel);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;text-align:center;cursor:pointer;transition:.12s;}
   .chip.sel{border-color:var(--gold);background:linear-gradient(180deg,#3a4a8a,#26346a);box-shadow:0 0 12px rgba(255,206,74,.35);}
   .chip .c{font-size:22px;line-height:1;}
   .chip .n{font-size:11px;font-weight:700;margin-top:3px;white-space:nowrap;}
-  .chip .d{font-size:9px;color:var(--gold);margin-top:1px;white-space:nowrap;}
 
-  /* ===== 홈 랭킹 ===== */
-  .home-best{margin:8px 16px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:14px;padding:10px 14px;font-size:13px;border:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;}
+  /* ===== 홈 점수 ===== */
+  .home-best{background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:14px;padding:10px 14px;font-size:13px;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:2px;}
   .home-best .sel-info{color:#fff;font-weight:800;}
   .home-best .best-info{color:var(--muted);}
   .home-best .best-info b{color:var(--gold);font-size:16px;}
-  .help-panel{flex:1;margin:0 16px;background:var(--panel2);border-radius:16px;overflow-y:auto;border:1px solid rgba(255,255,255,.08);min-height:120px;padding:12px 14px;}
-  .help-panel-head{font-size:13px;font-weight:800;color:var(--gold);margin-bottom:10px;}
-  .play-area{padding:12px 16px 18px;display:flex;gap:10px;}
-  .play-btn{flex:1;padding:16px;border:none;border-radius:18px;cursor:pointer;background:linear-gradient(180deg,#ffd76b,var(--gold2));color:var(--ink);font-size:18px;font-weight:900;box-shadow:0 5px 0 #b86a12;}
+  .help-panel{flex:1;background:var(--panel2);border-radius:16px;border:1px solid rgba(255,255,255,.08);min-height:0;padding:10px 14px;display:flex;flex-direction:column;}
+  .help-panel-head{font-size:13px;font-weight:800;color:var(--gold);margin-bottom:8px;flex-shrink:0;}
+  .help-grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;min-height:0;}
+  .play-area{margin-top:auto;display:flex;gap:8px;}
+  .play-btn{flex:1;padding:14px;border:none;border-radius:16px;cursor:pointer;background:linear-gradient(180deg,#ffd76b,var(--gold2));color:var(--ink);font-size:16px;font-weight:900;box-shadow:0 5px 0 #b86a12;}
   .play-btn:active{transform:translateY(4px);box-shadow:none;}
-  .refresh-btn{width:54px;border:none;border-radius:18px;background:var(--panel);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 5px 0 #0c1430;}
+  .refresh-btn{width:46px;border:none;border-radius:16px;background:var(--panel);color:#fff;font-size:18px;cursor:pointer;box-shadow:0 5px 0 #0c1430;}
   .refresh-btn:active{transform:translateY(4px);box-shadow:none;}
 
   /* ===== 게임 ===== */
@@ -72,31 +75,22 @@
   .game-hud{padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:flex-start;}
   .hud-l .score-big{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;}
   .hud-l .acc{font-size:12px;color:var(--muted);margin-top:2px;}
-  .hud-r{text-align:right;margin-right:44px;}
   .pause-btn{position:absolute;top:12px;right:14px;z-index:20;width:38px;height:38px;border-radius:10px;border:none;background:var(--panel2);color:#fff;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #0c1430;}
   .pause-btn:active{transform:translateY(2px);box-shadow:none;}
-  .hud-r .combo{font-size:30px;font-weight:900;color:var(--gold);line-height:1;}
-  .hud-r .combo small{font-size:13px;color:var(--muted);}
   .progress{height:6px;margin:6px 16px 0;background:var(--panel2);border-radius:4px;overflow:hidden;}
   .progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .1s linear;}
   .song-name-mini{text-align:center;font-size:12px;color:var(--muted);margin-top:6px;}
 
-  .grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:18px 10px;}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:56px 48px;width:min(340px,88vw);}
+  .grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 10px;min-height:0;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:min(8vh,40px) 40px;width:min(300px,90%);}
   .hole{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#16203e 40%,#0a1228 100%);box-shadow:inset 0 8px 18px rgba(0,0,0,.8),inset 0 -3px 6px rgba(80,110,200,.25);position:relative;overflow:visible;display:flex;align-items:center;justify-content:center;cursor:pointer;}
   .hole .clip{position:absolute;inset:0;border-radius:50%;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;}
   .hole::after{content:'';position:absolute;left:8%;right:8%;top:6%;height:30%;border-radius:50%;background:radial-gradient(ellipse at 50% 0%,rgba(0,0,0,.6),transparent 70%);pointer-events:none;z-index:5;}
   .hole.flash{animation:holeFlash .25s ease-out;}
   @keyframes holeFlash{0%{box-shadow:inset 0 8px 18px rgba(0,0,0,.8),0 0 0 0 var(--gold)}100%{box-shadow:inset 0 8px 18px rgba(0,0,0,.8),0 0 0 14px rgba(255,206,74,0)}}
 
-  /* 접근 링 (타이밍 가이드) */
-  .ring{position:absolute;left:50%;top:50%;width:100%;height:100%;border-radius:50%;border:4px solid var(--cyan);transform:translate(-50%,-50%) scale(2);opacity:0;pointer-events:none;z-index:6;}
-  .ring.show{opacity:.9;}
-  .ring.next{border-width:5px;box-shadow:0 0 10px rgba(70,209,209,.6);}
-  .ring.perfectzone{border-color:var(--gold);box-shadow:0 0 14px rgba(255,206,74,.8);}
-  .ring.holding{border-color:var(--cyan);border-width:5px;box-shadow:0 0 18px 4px rgba(70,209,209,.8);}
-  .hold-fill{position:absolute;left:50%;top:50%;width:76%;height:76%;transform:translate(-50%,-50%);border-radius:50%;opacity:0;pointer-events:none;}
-  .ring.holding .hold-fill{opacity:1;}
+  /* 남은 시간 카운트다운 */
+  .tap-timer{position:absolute;top:4%;left:50%;transform:translateX(-50%);width:30%;aspect-ratio:1;border-radius:50%;background:rgba(0,0,0,.6);border:2px solid var(--cyan);color:#fff;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;z-index:7;pointer-events:none;}
 
   /* 팡이 */
   .pangi-stack{position:absolute;bottom:-110%;display:flex;transition:bottom .18s cubic-bezier(.34,1.56,.64,1);padding-bottom:8%;z-index:4;}
@@ -110,11 +104,10 @@
   .pangi .eye{position:absolute;top:34%;width:10px;height:12px;background:#fff;border-radius:50%;}
   .pangi .eye.l{left:26%}.pangi .eye.r{right:26%}
   .pangi .eye::after{content:'';position:absolute;top:32%;left:28%;width:4px;height:5px;background:#111;border-radius:50%;}
-  .pangi.holdnote::after{content:'✋';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
 
   .judge-pop{position:absolute;left:50%;top:40%;transform:translateX(-50%);font-weight:900;font-size:18px;pointer-events:none;z-index:8;animation:jp .5s ease-out forwards;text-shadow:0 2px 4px #000;}
   @keyframes jp{0%{opacity:0;transform:translate(-50%,4px) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-22px) scale(1.1)}}
-  .judge-perfect{color:var(--gold)} .judge-good{color:var(--cyan)} .judge-miss{color:var(--pink)}
+  .judge-good{color:var(--cyan)} .judge-miss{color:var(--pink)}
 
   .countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;font-size:90px;font-weight:900;color:#fff;text-shadow:0 0 30px var(--gold);}
 
@@ -127,7 +120,7 @@
   .res-stats{display:flex;justify-content:space-around;background:var(--panel2);border-radius:12px;padding:12px;margin:12px 0;}
   .res-stats .st{text-align:center;font-size:11px;color:var(--muted);}
   .res-stats .st b{display:block;font-size:18px;margin-top:2px;}
-  .res-stats .st.p b{color:var(--gold)}.res-stats .st.g b{color:var(--cyan)}.res-stats .st.m b{color:var(--pink)}
+  .res-stats .st.g b{color:var(--cyan)}.res-stats .st.m b{color:var(--pink)}
   .res-rank{text-align:center;font-size:14px;margin-bottom:12px;}
   .res-rank b{color:var(--gold);font-size:20px;}
   .new-best{text-align:center;color:var(--green);font-weight:900;font-size:14px;margin-bottom:6px;animation:pulse 1s infinite;}
@@ -136,10 +129,12 @@
   .btn-row .btn{flex:1;}
   .fld{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:8px 0;color:#e6ecff;}
   .fld input{width:110px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;text-align:center;font-size:14px;}
-  .help-step{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start;}
-  .help-step .n{width:25px;height:25px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px;}
-  .help-step .txt{font-size:13px;line-height:1.5;color:#e6ecff;}
-  .help-step .txt b{color:var(--gold);}
+  .help-step{display:flex;flex-direction:column;min-height:0;min-width:0;}
+  .help-shot{width:100%;flex:1 1 auto;min-height:0;display:block;border-radius:8px;margin-bottom:6px;}
+  .step-row{display:flex;gap:6px;align-items:flex-start;flex-shrink:0;}
+  .step-row .n{width:17px;height:17px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:10px;}
+  .step-row .txt{font-size:10.5px;line-height:1.35;color:#e6ecff;}
+  .step-row .txt b{color:var(--gold);}
   .toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:10px 18px;border-radius:20px;font-size:13px;z-index:60;opacity:0;transition:.3s;white-space:nowrap;}
   .toast.show{opacity:1;}
 </style>
@@ -170,29 +165,107 @@
       </div>
     </div>
 
-    <div class="selectors">
-      <div class="sel-label">🎼 곡 선택 (난이도 고정)</div>
+    <div class="home-main">
+    <div class="home-side">
+      <div class="sel-label">🎼 곡 선택</div>
       <div class="song-chips" id="songChips"></div>
-    </div>
 
-    <div class="home-best">
-      <span class="sel-info" id="selInfo">스윙 버튼 · 보통</span>
-      <span class="best-info" id="bestInfo">내 최고 <b id="myBest">0</b> <span id="myRankLine"></span></span>
+      <div class="home-best">
+        <span class="sel-info" id="selInfo">스윙 버튼</span>
+        <span class="best-info" id="bestInfo">내 최고 <b id="myBest">0</b> <span id="myRankLine"></span></span>
+      </div>
+
+      <div class="play-area">
+        <button class="play-btn" onclick="startGame()">🎵 플레이 시작</button>
+        <button class="refresh-btn" onclick="loadLeaderboard()" title="새로고침">🔄</button>
+      </div>
     </div>
 
     <div class="help-panel">
       <div class="help-panel-head">📖 플레이 방법</div>
-      <div class="help-step"><div class="n">1</div><div class="txt"><b>스윙 버튼</b> 한 곡, <b>보통</b> 난이도로 리듬 패턴이 고정돼 있어요.</div></div>
-      <div class="help-step"><div class="n">2</div><div class="txt">노래 박자에 맞춰 4칸에서 팡이가 등장하고, 감싼 <b>링이 줄어들어요</b>. 링이 딱 맞는 순간 터치(또는 키보드 <b>E</b>·<b>F</b>·<b>O</b>·<b>K</b>) → <b style="color:#ffce4a">PERFECT</b>!</div></div>
-      <div class="help-step"><div class="n">3</div><div class="txt">살짝 어긋나면 <b style="color:#46d1d1">GOOD</b>, 놓치면 <b style="color:#ff6fa5">MISS</b>. <b>체력은 줄지 않아요</b> — 곡은 끝까지 진행됩니다.</div></div>
-      <div class="help-step"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b>면 <b>링도 마리 수만큼</b> 차례로 닫혀요. 순서대로 탁-탁-탁 연달아 터치!</div></div>
-      <div class="help-step"><div class="n">5</div><div class="txt">✋ 팡이가 있으면 <b>꾹 누르고 있어야</b> 해요. 링이 다 채워질 때까지 손을 떼지 마세요 — 일찍 떼면 MISS!</div></div>
-      <div class="help-step"><div class="n">6</div><div class="txt">최종 점수와 등급(S~D)이 <b>곡·난이도별 랭킹</b>에 반영돼요.</div></div>
-    </div>
+      <div class="help-grid">
 
-    <div class="play-area">
-      <button class="play-btn" onclick="startGame()">🎵 플레이 시작</button>
-      <button class="refresh-btn" onclick="loadLeaderboard()" title="새로고침">🔄</button>
+      <div class="help-step">
+        <svg class="help-shot" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+          <rect width="240" height="120" rx="12" fill="var(--panel2)"/>
+          <text x="120" y="22" text-anchor="middle" font-size="12" fill="var(--muted)">♪ 노래 박자에 맞춰 ♪</text>
+          <circle cx="120" cy="70" r="34" fill="#0a1228"/>
+          <circle cx="120" cy="70" r="52" fill="none" stroke="var(--cyan)" stroke-width="3" opacity=".85"/>
+          <circle cx="120" cy="68" r="20" fill="var(--gold)"/>
+          <ellipse cx="112" cy="65" rx="3.2" ry="3.8" fill="#fff"/><ellipse cx="128" cy="65" rx="3.2" ry="3.8" fill="#fff"/>
+          <circle cx="112" cy="66.5" r="1.2" fill="#111"/><circle cx="128" cy="66.5" r="1.2" fill="#111"/>
+        </svg>
+        <div class="step-row"><div class="n">1</div><div class="txt">노래 박자에 맞춰 <b>구멍에서 팡이가 등장</b>해요.</div></div>
+      </div>
+
+      <div class="help-step">
+        <svg class="help-shot" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+          <rect width="240" height="120" rx="12" fill="var(--panel2)"/>
+          <circle cx="80" cy="66" r="34" fill="#0a1228"/>
+          <circle cx="80" cy="64" r="20" fill="var(--gold)"/>
+          <ellipse cx="72" cy="61" rx="3.2" ry="3.8" fill="#fff"/><ellipse cx="88" cy="61" rx="3.2" ry="3.8" fill="#fff"/>
+          <circle cx="72" cy="62.5" r="1.2" fill="#111"/><circle cx="88" cy="62.5" r="1.2" fill="#111"/>
+          <circle cx="80" cy="30" r="15" fill="rgba(0,0,0,.6)" stroke="var(--cyan)" stroke-width="2.5"/>
+          <text x="80" y="35" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">3</text>
+          <path d="M140 34 L140 66 L147 59 L152 71 L157 69 L152 57 L162 57 Z" fill="#fff" stroke="#10182f" stroke-width="1.5" stroke-linejoin="round"/>
+          <g font-size="12" font-weight="800" text-anchor="middle">
+            <rect x="182" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="39" fill="#fff">E</text>
+            <rect x="206" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="39" fill="#fff">F</text>
+            <rect x="182" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="63" fill="#fff">O</text>
+            <rect x="206" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="63" fill="#fff">K</text>
+          </g>
+          <text x="120" y="104" text-anchor="middle" font-size="12" fill="var(--muted)">칸 위 숫자가 남은 시간!</text>
+        </svg>
+        <div class="step-row"><div class="n">2</div><div class="txt">마우스 클릭 또는 키보드 <b>E·F·O·K</b>로 눌러주세요. 칸 위에 <b>남은 시간(초)</b>이 표시돼요.</div></div>
+      </div>
+
+      <div class="help-step">
+        <svg class="help-shot" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+          <rect width="240" height="120" rx="12" fill="var(--panel2)"/>
+          <line x1="120" y1="14" x2="120" y2="106" stroke="rgba(255,255,255,.15)"/>
+          <circle cx="62" cy="58" r="28" fill="#0a1228"/>
+          <path d="M50 46 L74 70 M74 46 L50 70" stroke="var(--pink)" stroke-width="4" stroke-linecap="round"/>
+          <text x="62" y="102" text-anchor="middle" font-size="13" font-weight="800" fill="var(--pink)">MISS</text>
+          <circle cx="178" cy="58" r="28" fill="#0a1228"/>
+          <path d="M166 58 L175 67 L192 48" fill="none" stroke="var(--cyan)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="178" y="102" text-anchor="middle" font-size="13" font-weight="800" fill="var(--cyan)">GOOD</text>
+        </svg>
+        <div class="step-row"><div class="n">3</div><div class="txt">3초 안에 누르면 <b style="color:#46d1d1">GOOD</b>, 시간 안에 못 누르면 <b style="color:#ff6fa5">MISS</b>!</div></div>
+      </div>
+
+      <div class="help-step">
+        <svg class="help-shot" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+          <rect width="240" height="120" rx="12" fill="var(--panel2)"/>
+          <text x="120" y="18" text-anchor="middle" font-size="12" fill="var(--muted)">탁-탁 두 번 연달아!</text>
+          <circle cx="120" cy="68" r="34" fill="#0a1228"/>
+          <circle cx="112" cy="64" r="16" fill="#fff3c0"/>
+          <ellipse cx="108" cy="61" rx="2.4" ry="2.8" fill="#fff"/><ellipse cx="116" cy="61" rx="2.4" ry="2.8" fill="#fff"/>
+          <circle cx="128" cy="72" r="16" fill="var(--gold)"/>
+          <ellipse cx="124" cy="69" rx="2.4" ry="2.8" fill="#fff"/><ellipse cx="132" cy="69" rx="2.4" ry="2.8" fill="#fff"/>
+          <circle cx="120" cy="32" r="15" fill="rgba(0,0,0,.6)" stroke="var(--pink)" stroke-width="2.5"/>
+          <text x="120" y="37" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">2</text>
+        </svg>
+        <div class="step-row"><div class="n">4</div><div class="txt">한 칸에 팡이가 <b>여러 마리</b>면 그 수만큼 <b>연달아 탁-탁-탁</b> 눌러야 GOOD이에요!</div></div>
+      </div>
+
+      <div class="help-step">
+        <svg class="help-shot" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+          <rect width="240" height="120" rx="12" fill="var(--panel2)"/>
+          <g transform="translate(70,14)">
+            <path d="M25 6 H75 L67 40 Q50 50 33 40 Z" fill="var(--gold)"/>
+            <path d="M25 10 q-16 2 -11 20 q3 13 17 16" fill="none" stroke="var(--gold)" stroke-width="4" stroke-linecap="round"/>
+            <path d="M75 10 q16 2 11 20 q-3 13 -17 16" fill="none" stroke="var(--gold)" stroke-width="4" stroke-linecap="round"/>
+            <rect x="45" y="48" width="10" height="14" fill="var(--gold)"/>
+            <rect x="30" y="62" width="40" height="8" rx="3" fill="var(--gold)"/>
+          </g>
+          <text x="180" y="70" text-anchor="middle" font-size="26" font-weight="900" fill="var(--gold)">S</text>
+          <text x="180" y="94" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">최고점 도전!</text>
+        </svg>
+        <div class="step-row"><div class="n">5</div><div class="txt">최종 점수와 등급(S~D)이 <b>랭킹</b>에 반영돼요. 최고 점수에 도전해보세요!</div></div>
+      </div>
+
+      </div>
+    </div>
     </div>
   </div>
 
@@ -201,7 +274,6 @@
     <button class="pause-btn" id="pauseBtn" onclick="pauseGame()">⏸</button>
     <div class="game-hud">
       <div class="hud-l"><div class="score-big" id="scoreBig">0</div><div class="acc" id="accLine">정확도 100.0%</div></div>
-      <div class="hud-r"><div class="combo"><span id="comboNum">0</span><small> COMBO</small></div></div>
     </div>
     <div class="progress"><div class="bar" id="progressBar"></div></div>
     <div class="song-name-mini" id="gameSong">🎺 스윙 버튼</div>
@@ -217,11 +289,8 @@
    상태 / 설정
 ======================================================================== */
 let me = { nickname:'' };
-const LEAD = 0.95;              // 팡이 등장 후 타격 지점까지(s)
-const W_PERFECT = 0.085;        // ±0.085s = PERFECT
-const W_GOOD    = 0.18;         // ±0.18s = GOOD (그 밖은 MISS)
-const MULTI_GAP_BEAT = 0.5;     // 연타 팡이 간격(박)
-const SCORE = { perfect:300, good:100 };
+const REACT_WINDOW = 2.5;       // 팡이 등장 후 반응 제한시간(s) — 이 안에 다 누르면 GOOD, 넘기면 MISS
+const SCORE_GOOD = 100;
 
 /* ------------------------------------------------------------------------
    곡 목록 — 실제 음원(mp3) 1곡, BPM/오프셋에 맞춰 리듬 패턴(chart 타입)이
@@ -232,7 +301,7 @@ const SCORE = { perfect:300, good:100 };
 ------------------------------------------------------------------------ */
 const SONGS = [
   { id:'swingbutton', name:'스윙 버튼', cover:'🎺', kind:'file', src:'songs/swing-button.mp3',
-    bpm:152.0, offset:0.154, lengthBeats:400, diffKey:'normal', diffLabel:'보통', stars:'★★☆', chart:'swingEighth' },
+    bpm:152.0, offset:0.154, lengthBeats:400, diffKey:'normal', chart:'swingEighth' },
 ];
 
 let curSong = SONGS[0];
@@ -254,21 +323,16 @@ function pickHoleFactory(minGap){
   };
 }
 
-/* "스윙 버튼" — 쉬움과 보통 사이 정도로, 1.5박 간격에 가끔 스윙 추가음·연타·꾹 누르기(홀드) */
+/* "스윙 버튼" — 보통 수준으로, 1.2박 간격에 스윙 추가음·연타가 꽤 자주 */
 function chartSwingEighth(lengthBeats){
-  const chart=[]; const pickHole=pickHoleFactory(1.5); let seed=300;
-  for(let b=4; b<=lengthBeats-2; b+=1.5){
+  const chart=[]; const pickHole=pickHoleFactory(1.2); let seed=300;
+  for(let b=4; b<=lengthBeats-2; b+=1.2){
     seed++;
-    const holdLen = hash01(seed*13.7)<0.1 ? 1 : 0;
-    if(holdLen>0 && b+holdLen<=lengthBeats-2){
-      chart.push({ b, h:pickHole(b, seed*1.7), hold:holdLen });
-      continue;
-    }
-    const c1 = hash01(seed*5.1)<0.12 ? 2 : 1;
+    const c1 = hash01(seed*5.1)<0.2 ? (hash01(seed*7.3)<0.25 ? 3 : 2) : 1;
     chart.push({ b, h:pickHole(b, seed*1.7), c:c1 });
-    if(hash01(seed*11.3) < 0.2){
+    if(hash01(seed*11.3) < 0.32){
       seed++;
-      const b2 = b + 0.75;
+      const b2 = b + 0.6;
       chart.push({ b:b2, h:pickHole(b2, seed*1.7), c:1 });
     }
   }
@@ -293,7 +357,7 @@ function initAudio(){
   if(actx) return;
   actx = new (window.AudioContext||window.webkitAudioContext)();
   masterGain = actx.createGain(); masterGain.gain.value = 0.6; masterGain.connect(actx.destination);
-  noiseBuf = actx.createBuffer(1, actx.sampleRate*0.3, actx.sampleRate);
+  noiseBuf = actx.createBuffer(1, actx.sampleRate*0.6, actx.sampleRate);
   const d = noiseBuf.getChannelData(0);
   for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
 }
@@ -302,7 +366,19 @@ function kick(t){ const o=actx.createOscillator(),g=actx.createGain(); o.connect
 function snare(t){ const n=actx.createBufferSource();n.buffer=noiseBuf; const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=1200; const g=actx.createGain(); n.connect(f);f.connect(g);g.connect(masterGain); env(g.gain,t,0.001,0.35,0.14); n.start(t);n.stop(t+0.16); }
 function hat(t){ const n=actx.createBufferSource();n.buffer=noiseBuf; const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=7000; const g=actx.createGain(); n.connect(f);f.connect(g);g.connect(masterGain); env(g.gain,t,0.001,0.12,0.04); n.start(t);n.stop(t+0.05); }
 function tone(t,freq,peak,dur,type){ const o=actx.createOscillator(),g=actx.createGain(); o.type=type||'triangle';o.frequency.value=freq; o.connect(g);g.connect(masterGain); env(g.gain,t,0.005,peak,dur); o.start(t);o.stop(t+dur+0.05); }
-function hitPing(){ if(!actx)return; tone(actx.currentTime,1320,0.25,0.12,'square'); }
+/* 드럼 심벌(크래시) 소리 — 하이패스 노이즈 2겹(밝은 쉬익 + 살짝 낮은 몸통)으로 합성 */
+function cymbal(t){
+  const bright=actx.createBufferSource(); bright.buffer=noiseBuf;
+  const bf=actx.createBiquadFilter(); bf.type='highpass'; bf.frequency.value=6000;
+  const bg=actx.createGain(); bright.connect(bf); bf.connect(bg); bg.connect(masterGain);
+  env(bg.gain,t,0.001,0.32,0.32); bright.start(t); bright.stop(t+0.4);
+
+  const body=actx.createBufferSource(); body.buffer=noiseBuf;
+  const bodyf=actx.createBiquadFilter(); bodyf.type='highpass'; bodyf.frequency.value=2800;
+  const bodyg=actx.createGain(); body.connect(bodyf); bodyf.connect(bodyg); bodyg.connect(masterGain);
+  env(bodyg.gain,t,0.001,0.18,0.22); body.start(t); body.stop(t+0.3);
+}
+function hitPing(){ if(!actx)return; cymbal(actx.currentTime); }
 function missThud(){ if(!actx)return; tone(actx.currentTime,160,0.2,0.12,'sawtooth'); }
 
 /* 음악 시작/정지 — 게임 시계(songStart)를 음악 시작에 맞춤 */
@@ -357,11 +433,11 @@ const saved=localStorage.getItem('pangi_nick'); if(saved) document.getElementByI
 function renderSongChips(){
   const el=document.getElementById('songChips');
   el.innerHTML = SONGS.map(s=>`<div class="chip ${s.id===curSong.id?'sel':''}" data-sid="${s.id}">
-      <div class="c">${s.cover}</div><div class="n">${escapeHtml(s.name)}</div><div class="d">${s.diffLabel} ${s.stars}</div></div>`).join('');
+      <div class="c">${s.cover}</div><div class="n">${escapeHtml(s.name)}</div></div>`).join('');
   el.querySelectorAll('.chip[data-sid]').forEach(c=>c.onclick=()=>selectSong(SONGS.find(s=>s.id===c.dataset.sid)));
 }
 function selectSong(s){ if(!s)return; curSong=s; BEAT=60/s.bpm; renderSongChips(); updateSelInfo(); loadLeaderboard(); ensureBuffer(s).catch(()=>{}); }
-function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${curSong.diffLabel}`; }
+function updateSelInfo(){ document.getElementById('selInfo').textContent=curSong.name; }
 
 /* 저장소 — 서버 없으면 브라우저 localStorage로 폴백 */
 // file:// 또는 정적 호스팅(GitHub Pages 등)이면 서버 대신 브라우저 저장소 사용
@@ -406,7 +482,7 @@ function escapeHtml(s){ return String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'
    게임
 ======================================================================== */
 let notes=[], rafId=null, playing=false, paused=false, pausedAt=0, countdownTimer=null, curLastBeat=64;
-let score=0, combo=0, maxCombo=0, cPerfect=0, cGood=0, cMiss=0, totalTaps=0;
+let score=0, cGood=0, cMiss=0, totalTaps=0;
 
 async function startGame(){
   initAudio();
@@ -415,9 +491,9 @@ async function startGame(){
   if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
   document.getElementById('home').classList.add('hidden');
   document.getElementById('game').classList.remove('hidden');
-  document.getElementById('gameSong').textContent=`🎶 ${curSong.name} · ${curSong.diffLabel}`;
+  document.getElementById('gameSong').textContent=`🎶 ${curSong.name}`;
   buildGrid();
-  score=0;combo=0;maxCombo=0;cPerfect=0;cGood=0;cMiss=0;totalTaps=0;
+  score=0;cGood=0;cMiss=0;totalTaps=0;
   updateHUD();
 
   const cd=document.getElementById('countdown'); cd.classList.remove('hidden');
@@ -450,7 +526,7 @@ function pauseGame(){
   const ov=document.createElement('div'); ov.className='overlay'; ov.id='pauseOverlay';
   ov.innerHTML=`<div class="modal">
     <h2>⏸ 일시정지</h2>
-    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;">🎶 ${escapeHtml(curSong.name)} · ${curSong.diffLabel}</div>
+    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;">🎶 ${escapeHtml(curSong.name)}</div>
     <button class="btn primary" style="width:100%;margin-bottom:10px;" onclick="resumeGame()">▶ 계속하기</button>
     <div class="btn-row">
       <button class="btn ghost" onclick="restartFromPause()">🔄 처음부터</button>
@@ -470,7 +546,7 @@ function resumeGame(){
   const posAtPause = pausedAt - oldSongStart;   // 정지 시점의 곡 진행(초)
   const delta = R - pausedAt;                   // 정지에 머문 시간만큼 시프트
   songStart = oldSongStart + delta;
-  for(const n of notes){ n.appearTime += delta; for(const h of n.hits) h.time += delta; }
+  for(const n of notes){ n.appearTime += delta; if(n.spawned && !n.done) n.deadline += delta; }
   // 음악 재개 (정지 위치부터)
   const bufPos = posAtPause + (curSong.offset||0);
   if(bufPos < curSong.buffer.duration - 0.05){
@@ -489,7 +565,7 @@ function quitGame(){
   document.getElementById('pauseOverlay')?.remove();
   document.getElementById('resOverlay')?.remove();
   document.getElementById('countdown')?.classList.add('hidden');
-  document.querySelectorAll('.ring').forEach(r=>r.remove());
+  document.querySelectorAll('.tap-timer').forEach(t=>t.remove());
   document.querySelectorAll('.pangi-stack').forEach(s=>s.remove());
   document.getElementById('game').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
@@ -502,9 +578,6 @@ function buildGrid(){
     const hole=document.createElement('div'); hole.className='hole'; hole.dataset.i=i;
     hole.innerHTML='<div class="clip"></div>';
     hole.addEventListener('pointerdown',e=>{ e.preventDefault(); onTap(i); });
-    hole.addEventListener('pointerup',()=>onRelease(i));
-    hole.addEventListener('pointercancel',()=>onRelease(i));
-    hole.addEventListener('pointerleave',()=>onRelease(i));
     grid.appendChild(hole);
   }
 }
@@ -517,66 +590,36 @@ document.addEventListener('keydown', e=>{
   if(hole===undefined) return;
   onTap(hole);
 });
-document.addEventListener('keyup', e=>{
-  const hole = KEY_HOLE[e.key.toLowerCase()];
-  if(hole===undefined) return;
-  onRelease(hole);
-});
 
 function beginSong(){
   const chart = genChartFor(curSong);
-  const GAP = MULTI_GAP_BEAT * BEAT;
   startMusic(); // songStart 설정
   notes = chart.map((n,idx)=>{
-    const hole=n.h;
     const base=songStart + n.b*BEAT;
-    if(n.hold){
-      const startTime=base, endTime=base+n.hold*BEAT;
-      return { id:idx, hole, kind:'hold', startTime, endTime, appearTime:startTime-LEAD,
-        spawned:false, pressed:false, done:false, el:null, stackEl:null, ring:null, fill:null, pangi:null };
-    }
-    const count=n.c||1;
-    const hits=[]; for(let k=0;k<count;k++) hits.push({ time:base+k*GAP, done:false, ring:null, pangi:null });
-    return { id:idx, hole, kind:'tap', count, hits, appearTime:base-LEAD, spawned:false, done:false, el:null, stackEl:null };
+    return { id:idx, hole:n.h, need:(n.c||1), got:0, appearTime:base, deadline:0,
+      spawned:false, done:false, el:null, stackEl:null, timerEl:null };
   });
-  totalTaps = notes.reduce((s,n)=>s+(n.kind==='hold'?1:n.count),0);
-  curLastBeat = Math.max(...chart.map(n=>n.b + (n.hold||(n.c>1?(n.c-1)*MULTI_GAP_BEAT:0)))) + 2;
+  totalTaps = notes.length;
+  curLastBeat = Math.max(...chart.map(n=>n.b)) + Math.ceil(REACT_WINDOW/BEAT) + 1;
   playing=true; loop();
 }
 
 function loop(){
   if(!playing) return;
   const now=actx.currentTime;
+  let activeCount = notes.reduce((s,m)=>s+(m.spawned && !m.done ? 1 : 0),0);
   for(const n of notes){
     if(n.done) continue;
-    if(!n.spawned && now>=n.appearTime){ spawnNote(n); }
-    if(!n.spawned) continue;
-    if(n.kind==='hold'){
-      if(!n.pressed){
-        const scale = 1 + Math.max(0, Math.min(1.7, (n.startTime - now)/LEAD));
-        n.ring.style.transform = `translate(-50%,-50%) scale(${scale})`;
-        n.ring.classList.toggle('perfectzone', Math.abs(now-n.startTime)<=W_PERFECT);
-        if(now > n.startTime + W_GOOD){ missHold(n); }
-      } else {
-        const prog = Math.max(0, Math.min(1, (now-n.startTime)/(n.endTime-n.startTime)));
-        n.fill.style.background = `conic-gradient(var(--gold) ${prog*360}deg, transparent ${prog*360}deg)`;
-        if(now >= n.endTime){ successHold(n); }
+    if(!n.spawned){
+      // 항상 최소 한 칸은 비워둬서 계속 이어서 움직일 수 있도록 함
+      if(now>=n.appearTime && activeCount<HOLES-1 && !notes.some(m=>m.spawned && !m.done && m.hole===n.hole)){
+        spawnNote(n); activeCount++;
       }
       continue;
     }
-    let nextIdx=-1;
-    for(let k=0;k<n.hits.length;k++){ if(!n.hits[k].done){ nextIdx=k; break; } }
-    for(let k=0;k<n.hits.length;k++){
-      const h=n.hits[k]; if(h.done||!h.ring) continue;
-      const scale = 1 + Math.max(0, Math.min(1.7, (h.time - now)/LEAD));
-      h.ring.style.transform = `translate(-50%,-50%) scale(${scale})`;
-      const isNext = (k===nextIdx);
-      h.ring.style.opacity = isNext ? '0.95' : '0.35';
-      h.ring.classList.toggle('next', isNext);
-      h.ring.classList.toggle('perfectzone', isNext && Math.abs(now-h.time)<=W_PERFECT);
-      if(now > h.time + W_GOOD){ missHit(n,h); }
-    }
-    if(n.hits.every(h=>h.done)) clearNote(n);
+    const remain = n.deadline - now;
+    if(n.timerEl) n.timerEl.textContent = Math.max(0,Math.ceil(remain));
+    if(remain<=0){ missNote(n); }
   }
   const elapsed=now-songStart, totalDur=curLastBeat*BEAT;
   document.getElementById('progressBar').style.width=Math.min(100, Math.max(0,elapsed/totalDur*100))+'%';
@@ -586,114 +629,49 @@ function loop(){
 
 function spawnNote(n){
   n.spawned=true;
+  n.deadline = actx.currentTime + REACT_WINDOW;
   const hole=document.querySelector(`.hole[data-i="${n.hole}"]`);
   const clip=hole.querySelector('.clip');
   const stack=document.createElement('div'); stack.className='pangi-stack';
-  if(n.kind==='hold'){
-    const p=document.createElement('div'); p.className='pangi '+colorFor(n.hole)+' holdnote';
-    p.innerHTML='<div class="eye l"></div><div class="eye r"></div>';
-    stack.appendChild(p); n.pangi=p;
-    clip.appendChild(stack);
-    const ring=document.createElement('div'); ring.className='ring show'; hole.appendChild(ring);
-    const fill=document.createElement('div'); fill.className='hold-fill'; ring.appendChild(fill);
-    n.ring=ring; n.fill=fill;
-    n.stackEl=stack; n.el=hole;
-    requestAnimationFrame(()=>stack.classList.add('up'));
-    return;
-  }
-  for(let k=0;k<n.count;k++){
+  for(let k=0;k<n.need;k++){
     const p=document.createElement('div'); p.className='pangi '+colorFor(n.hole);
     p.innerHTML='<div class="eye l"></div><div class="eye r"></div>';
-    stack.appendChild(p); n.hits[k].pangi=p;
+    stack.appendChild(p);
   }
   clip.appendChild(stack);
-  for(let k=0;k<n.count;k++){
-    const ring=document.createElement('div'); ring.className='ring show'; hole.appendChild(ring);
-    n.hits[k].ring=ring;
-  }
-  n.stackEl=stack; n.el=hole;
+  const timer=document.createElement('div'); timer.className='tap-timer'; timer.textContent=Math.ceil(REACT_WINDOW); hole.appendChild(timer);
+  n.timerEl=timer; n.stackEl=stack; n.el=hole;
   requestAnimationFrame(()=>stack.classList.add('up'));
 }
 
 function onTap(hole){
   if(!playing) return;
-  const now=actx.currentTime;
-  for(const n of notes){
-    if(n.done || n.kind!=='hold' || n.hole!==hole || !n.spawned || n.pressed) continue;
-    if(now < n.startTime - W_GOOD) continue;
-    n.pressed=true;
-    n.ring.classList.add('holding');
-    hitPing();
-    return;
-  }
-  let tNote=null, tHit=null, bestDiff=Infinity;
-  for(const n of notes){
-    if(n.done || n.kind!=='tap' || !n.spawned || n.hole!==hole) continue;
-    let h=null; for(const hh of n.hits){ if(!hh.done){ h=hh; break; } }
-    if(!h) continue;
-    if(now < h.time - W_GOOD) continue;
-    const diff=Math.abs(now-h.time);
-    if(diff<bestDiff){ bestDiff=diff; tNote=n; tHit=h; }
-  }
-  if(!tHit) return;
-  const judge = bestDiff<=W_PERFECT ? 'perfect' : 'good';
-  applyHit(tNote, judge);
-  resolveHit(tHit);
-  if(tNote.el){ tNote.el.classList.remove('flash'); void tNote.el.offsetWidth; tNote.el.classList.add('flash'); }
-  hitPing();
-  if(tNote.hits.every(h=>h.done)) clearNote(tNote);
-}
-
-function onRelease(hole){
-  if(!playing) return;
-  for(const n of notes){
-    if(n.done || n.kind!=='hold' || n.hole!==hole || !n.pressed) continue;
-    missHold(n); // 홀드 끝나기 전에 손을 뗌 = 실패 (끝까지 누르고 있었다면 loop()가 이미 successHold로 처리했을 것)
-    return;
-  }
-}
-
-function applyHit(n, judge){
-  if(judge==='perfect'){ score+=SCORE.perfect; cPerfect++; combo++; popJudge(n,'PERFECT','perfect'); }
-  else { score+=SCORE.good; cGood++; combo++; popJudge(n,'GOOD','good'); }
-  score += Math.floor(combo/10)*5;
-  maxCombo=Math.max(maxCombo,combo);
-  updateHUD();
-}
-function missHit(n,h){
-  if(h.done) return;
-  cMiss++; combo=0; popJudge(n,'MISS','miss'); missThud();
-  resolveHit(h); updateHUD();
-}
-function resolveHit(h){
-  h.done=true;
-  if(h.ring){ h.ring.remove(); h.ring=null; }
-  if(h.pangi){ h.pangi.remove(); h.pangi=null; }
-}
-function clearNote(n){
-  if(n.done) return;
-  n.done=true;
-  for(const h of n.hits){ if(h.ring){ h.ring.remove(); h.ring=null; } }
-  if(n.stackEl){ const s=n.stackEl; s.classList.remove('up'); s.classList.add('retract'); setTimeout(()=>s.remove(),200); n.stackEl=null; }
-}
-function missHold(n){
-  if(n.done) return;
-  n.done=true; n.pressed=false;
-  cMiss++; combo=0; popJudge(n,'MISS','miss'); missThud();
-  clearHoldVisual(n); updateHUD();
-}
-function successHold(n){
-  if(n.done) return;
-  n.done=true; n.pressed=false;
-  applyHit(n,'perfect');
+  const n = notes.find(x=>x.spawned && !x.done && x.hole===hole);
+  if(!n) return;
+  n.got++;
+  if(n.stackEl && n.stackEl.lastElementChild){ n.stackEl.lastElementChild.remove(); }
   if(n.el){ n.el.classList.remove('flash'); void n.el.offsetWidth; n.el.classList.add('flash'); }
   hitPing();
-  clearHoldVisual(n);
+  if(n.got>=n.need) successNote(n);
 }
-function clearHoldVisual(n){
-  if(n.ring){ n.ring.remove(); n.ring=null; n.fill=null; }
+
+function successNote(n){
+  if(n.done) return;
+  n.done=true;
+  score+=SCORE_GOOD; cGood++; popJudge(n,'GOOD','good');
+  updateHUD();
+  clearNoteVisual(n);
+}
+function missNote(n){
+  if(n.done) return;
+  n.done=true;
+  cMiss++; popJudge(n,'MISS','miss'); missThud();
+  updateHUD();
+  clearNoteVisual(n);
+}
+function clearNoteVisual(n){
+  if(n.timerEl){ n.timerEl.remove(); n.timerEl=null; }
   if(n.stackEl){ const s=n.stackEl; s.classList.remove('up'); s.classList.add('retract'); setTimeout(()=>s.remove(),200); n.stackEl=null; }
-  n.pangi=null;
 }
 function popJudge(n,text,cls){
   if(!n.el) return;
@@ -701,15 +679,14 @@ function popJudge(n,text,cls){
 }
 function updateHUD(){
   document.getElementById('scoreBig').textContent=score.toLocaleString();
-  document.getElementById('comboNum').textContent=combo;
-  const maxScore=totalTaps*SCORE.perfect || 1;
+  const maxScore=totalTaps*SCORE_GOOD || 1;
   document.getElementById('accLine').textContent='정확도 '+Math.min(100, score/maxScore*100).toFixed(1)+'%';
 }
 
 async function endSong(){
   playing=false; stopMusic();
   if(rafId) cancelAnimationFrame(rafId);
-  const maxScore=totalTaps*SCORE.perfect || 1;
+  const maxScore=totalTaps*SCORE_GOOD || 1;
   const acc=Math.min(100, score/maxScore*100);
   const grade = acc>=95?'S':acc>=85?'A':acc>=70?'B':acc>=50?'C':'D';
   const gradeColor = {S:'#ffce4a',A:'#46d17e',B:'#46d1d1',C:'#a8b8e6',D:'#ff6fa5'}[grade];
@@ -719,10 +696,8 @@ async function endSong(){
     <div class="res-grade" style="color:${gradeColor}">${grade}</div>
     <div class="res-score">${score.toLocaleString()}</div>
     <div class="res-stats">
-      <div class="st p">PERFECT<b>${cPerfect}</b></div>
       <div class="st g">GOOD<b>${cGood}</b></div>
       <div class="st m">MISS<b>${cMiss}</b></div>
-      <div class="st">MAX COMBO<b>${maxCombo}</b></div>
     </div>
     <div class="new-best hidden" id="newBest">🎉 신기록 달성!</div>
     <div class="res-rank" id="resRank">정확도 ${acc.toFixed(1)}%</div>
