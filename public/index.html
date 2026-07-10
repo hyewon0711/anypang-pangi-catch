@@ -104,6 +104,8 @@
   .game-hud{padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:flex-start;}
   .hud-l .score-big{font-family:'Jua',sans-serif;font-size:28px;font-variant-numeric:tabular-nums;line-height:1;color:var(--gold-text);}
   .hud-l .acc{font-size:12px;color:var(--muted);margin-top:2px;}
+  .hud-r{text-align:right;margin-right:44px;}
+  .hud-r .timer{font-family:'Jua',sans-serif;font-size:24px;color:var(--cyan-text);}
   .pause-btn{position:absolute;top:12px;right:14px;z-index:20;width:38px;height:38px;border-radius:12px;border:none;background:var(--panel);color:var(--text);font-size:15px;cursor:pointer;box-shadow:0 3px 0 var(--hairline);}
   .pause-btn:active{transform:translateY(2px);box-shadow:none;}
   .progress{height:7px;margin:6px 18px 0;background:var(--hairline);border-radius:4px;overflow:hidden;}
@@ -310,6 +312,7 @@
     <button class="pause-btn" id="pauseBtn" onclick="pauseGame()">⏸</button>
     <div class="game-hud">
       <div class="hud-l"><div class="score-big" id="scoreBig">0</div><div class="acc" id="accLine">정확도 100.0%</div></div>
+      <div class="hud-r"><div class="timer" id="timerText">1:00</div></div>
     </div>
     <div class="progress"><div class="bar" id="progressBar"></div></div>
     <div class="song-name-mini" id="gameSong">🎺 스윙 버튼</div>
@@ -327,6 +330,8 @@
 let me = { nickname:'' };
 const REACT_WINDOW = 2.5;       // 팡이 등장 후 반응 제한시간(s) — 이 안에 다 누르면 GOOD, 넘기면 MISS
 const SCORE_GOOD = 100;
+const GAME_DURATION = 60;       // 한 판 게임 시간(s) — 지나면 자동으로 결과 팝업
+function fmtTime(s){ s=Math.max(0,Math.ceil(s)); const m=Math.floor(s/60), sec=s%60; return m+':'+String(sec).padStart(2,'0'); }
 
 /* ===== 테마(밝음/어두움) ===== */
 function applyTheme(theme){
@@ -535,7 +540,7 @@ function escapeHtml(s){ return String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'
 /* ========================================================================
    게임
 ======================================================================== */
-let notes=[], rafId=null, playing=false, paused=false, pausedAt=0, countdownTimer=null, curLastBeat=64;
+let notes=[], rafId=null, playing=false, paused=false, pausedAt=0, countdownTimer=null;
 let score=0, cGood=0, cMiss=0, totalTaps=0;
 
 async function startGame(){
@@ -549,6 +554,7 @@ async function startGame(){
   buildGrid();
   score=0;cGood=0;cMiss=0;totalTaps=0;
   updateHUD();
+  document.getElementById('timerText').textContent=fmtTime(GAME_DURATION);
 
   const cd=document.getElementById('countdown'); cd.classList.remove('hidden');
   if(curSong.kind==='file' && !curSong.buffer){
@@ -649,7 +655,7 @@ document.addEventListener('keydown', e=>{
 });
 
 function beginSong(){
-  const chart = genChartFor(curSong);
+  const chart = genChartFor(curSong).filter(n=>n.b*BEAT <= GAME_DURATION);
   startMusic(); // songStart 설정
   notes = chart.map((n,idx)=>{
     const base=songStart + n.b*BEAT;
@@ -657,7 +663,6 @@ function beginSong(){
       spawned:false, done:false, el:null, stackEl:null, timerEl:null };
   });
   totalTaps = notes.length;
-  curLastBeat = Math.max(...chart.map(n=>n.b)) + Math.ceil(REACT_WINDOW/BEAT) + 1;
   playing=true; loop();
 }
 
@@ -678,9 +683,10 @@ function loop(){
     if(n.timerEl) n.timerEl.textContent = Math.max(0,Math.ceil(remain));
     if(remain<=0){ missNote(n); }
   }
-  const elapsed=now-songStart, totalDur=curLastBeat*BEAT;
-  document.getElementById('progressBar').style.width=Math.min(100, Math.max(0,elapsed/totalDur*100))+'%';
-  if(now > songStart + curLastBeat*BEAT){ endSong(); return; }
+  const elapsed=now-songStart;
+  document.getElementById('progressBar').style.width=Math.min(100, Math.max(0,elapsed/GAME_DURATION*100))+'%';
+  const timerEl=document.getElementById('timerText'); if(timerEl) timerEl.textContent=fmtTime(GAME_DURATION-elapsed);
+  if(elapsed >= GAME_DURATION){ endSong(); return; }
   rafId=requestAnimationFrame(loop);
 }
 
