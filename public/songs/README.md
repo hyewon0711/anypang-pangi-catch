@@ -1,12 +1,12 @@
 # 🎵 실제 음원(mp3) 추가하는 법
 
-이 폴더(`public/songs/`)에 음원 파일을 넣고, `public/rhythm.html`의 `SONGS` 배열에 한 줄 추가하면
+이 폴더(`public/songs/`)에 음원 파일을 넣고, `public/index.html`의 `SONGS` 배열에 한 줄 추가하면
 곡 선택 화면에 새 곡이 나타나고 **곡·난이도별 랭킹**에 반영됩니다.
 
 ## 1) 파일 넣기
 예: `public/songs/mysong.mp3` (mp3/ogg/wav 등 브라우저가 재생 가능한 포맷)
 
-## 2) rhythm.html의 SONGS에 등록
+## 2) index.html의 SONGS에 등록
 ```js
 const SONGS = [
   { id:'pangibeat', name:'팡이 비트', cover:'🎶', kind:'synth', bpm:120, offset:0, lengthBeats:64, ranked:true },

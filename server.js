@@ -1,11 +1,11 @@
 /**
- * 팡이를 잡아라! — 랭킹 웹게임 서버
+ * 팡이 리듬! — 랭킹 웹게임 서버
  * 무의존성(Node 기본 모듈만 사용). 점수는 scores.json 파일에 저장.
  *
  * 실행:  node server.js
  * 접속:  http://localhost:3000  (같은 네트워크의 다른 유저는 http://<내IP>:3000)
  *
- * 모드별 랭킹 분리: catch(팡이 잡기) / rhythm(리듬 모드)
+ * 곡·난이도별 랭킹 분리: mode 키 = 'rhythm:<곡id>:<난이도>'
  */
 const http = require('http');
 const fs = require('fs');
@@ -29,10 +29,10 @@ function loadDB() {
 function saveDB() { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); }
 let db = loadDB();
 
-// 안전한 mode 키만 허용 (영문/숫자/: _ -), 그 외엔 'catch'
+// 안전한 mode 키만 허용 (영문/숫자/: _ -), 그 외엔 기본값
 function sanitizeMode(m) {
   m = String(m || '').toLowerCase();
-  return /^[a-z0-9:_-]{1,48}$/.test(m) ? m : 'catch';
+  return /^[a-z0-9:_-]{1,48}$/.test(m) ? m : 'rhythm:pangibeat:normal';
 }
 function modeStore(mode) {
   const key = sanitizeMode(mode);
@@ -79,9 +79,9 @@ function sendJSON(res, code, obj) {
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://localhost');
 
-  // 랭킹 조회  /api/leaderboard?mode=catch | rhythm:<곡>:<난이도>
+  // 랭킹 조회  /api/leaderboard?mode=rhythm:<곡>:<난이도>
   if (req.method === 'GET' && u.pathname === '/api/leaderboard') {
-    const mode = sanitizeMode(u.searchParams.get('mode') || 'catch');
+    const mode = sanitizeMode(u.searchParams.get('mode'));
     return sendJSON(res, 200, { ok: true, mode, leaderboard: leaderboard(mode, 100), total: Object.keys(modeStore(mode)).length });
   }
 
@@ -118,9 +118,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`\n🕳️  팡이를 잡아라! 서버 실행 중`);
-  console.log(`   로컬:      http://localhost:${PORT}            (팡이 잡기)`);
-  console.log(`              http://localhost:${PORT}/rhythm.html (리듬 모드)`);
+  console.log(`\n🎵  팡이 리듬! 서버 실행 중`);
+  console.log(`   로컬:      http://localhost:${PORT}`);
   const os = require('os');
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
