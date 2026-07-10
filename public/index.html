@@ -399,6 +399,23 @@ function stopMusic(){
   if(musicSource){ try{ musicSource.stop(); }catch(e){} musicSource=null; }
 }
 
+/* 실제 음원(src) 다운로드 + 디코딩 — 최초 1회만, 이후 song.buffer에 캐시 */
+const bufferLoads = {};
+function ensureBuffer(song){
+  if(song.kind !== 'file') return Promise.resolve(null);
+  if(song.buffer) return Promise.resolve(song.buffer);
+  if(!song.src) return Promise.resolve(null); // 업로드된 곡인데 아직 디코딩 전인 이례적 상태
+  if(!bufferLoads[song.id]){
+    initAudio();
+    bufferLoads[song.id] = fetch(song.src)
+      .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); })
+      .then(arr=>actx.decodeAudioData(arr))
+      .then(buf=>{ song.buffer=buf; return buf; })
+      .catch(err=>{ delete bufferLoads[song.id]; throw err; });
+  }
+  return bufferLoads[song.id];
+}
+
 /* ========================================================================
    입장 / 선택 UI / 랭킹
 ======================================================================== */
@@ -410,6 +427,7 @@ function enter(){
   document.getElementById('lobby').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
   renderSongChips(); updateSelInfo(); loadLeaderboard();
+  ensureBuffer(curSong).catch(()=>{}); // 미리 받아두기(플레이 시작 대기시간 줄이기)
 }
 function backToLobby(){
   document.getElementById('home').classList.add('hidden');
@@ -427,7 +445,7 @@ function renderSongChips(){
   el.querySelectorAll('.chip[data-sid]').forEach(c=>c.onclick=()=>selectSong(SONGS.find(s=>s.id===c.dataset.sid)));
   document.getElementById('addChip').onclick=pickFile;
 }
-function selectSong(s){ if(!s)return; curSong=s; BEAT=60/s.bpm; renderSongChips(); updateSelInfo(); loadLeaderboard(); }
+function selectSong(s){ if(!s)return; curSong=s; BEAT=60/s.bpm; renderSongChips(); updateSelInfo(); loadLeaderboard(); ensureBuffer(s).catch(()=>{}); }
 function updateSelInfo(){ document.getElementById('selInfo').textContent=`${curSong.name} · ${curSong.diffLabel}`; }
 
 /* 저장소 — 서버 없으면 브라우저 localStorage로 폴백 */
@@ -527,7 +545,7 @@ function askBpm(name, buffer){
 let notes=[], rafId=null, playing=false, paused=false, pausedAt=0, countdownTimer=null, curLastBeat=64;
 let score=0, combo=0, maxCombo=0, cPerfect=0, cGood=0, cMiss=0, totalTaps=0;
 
-function startGame(){
+async function startGame(){
   initAudio();
   if(actx.state==='suspended') actx.resume();
   paused=false;
@@ -538,7 +556,20 @@ function startGame(){
   buildGrid();
   score=0;combo=0;maxCombo=0;cPerfect=0;cGood=0;cMiss=0;totalTaps=0;
   updateHUD();
+
   const cd=document.getElementById('countdown'); cd.classList.remove('hidden');
+  if(curSong.kind==='file' && !curSong.buffer){
+    cd.textContent='🎵';
+    try{ await ensureBuffer(curSong); }
+    catch(e){
+      toast('음원을 불러오지 못했습니다. 다시 시도해주세요');
+      cd.classList.add('hidden');
+      document.getElementById('game').classList.add('hidden');
+      document.getElementById('home').classList.remove('hidden');
+      return;
+    }
+  }
+
   let n=3; cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square');
   countdownTimer=setInterval(()=>{ n--;
     if(n>0){ cd.textContent=n; tone(actx.currentTime,660,0.2,0.2,'square'); }
