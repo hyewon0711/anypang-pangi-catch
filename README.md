@@ -14,7 +14,7 @@ pangi-web/
 ├─ server.js            # (선택) 무의존성 Node 서버 — 여러 유저가 랭킹을 공유하고 싶을 때
 ├─ public/index.html    # 게임 본체 (팡이 리듬)
 ├─ public/rhythm.html   # 구 URL 호환용 리다이렉트 → index.html
-├─ public/songs/        # 실제 음원(mp3) 3곡 + 추가 방법 README (mp3는 git 제외)
+├─ public/songs/        # 실제 음원(mp3) 2곡 + 추가 방법 README (mp3는 git 제외)
 ├─ tools/analyze_bpm.py # 음원 BPM·오프셋 실측 스크립트 (ffmpeg+numpy)
 ├─ scores.json          # (서버 사용 시) 점수 저장 파일 (자동 생성, git 제외)
 ├─ render.yaml          # (선택) Render 배포 설정
@@ -28,21 +28,18 @@ pangi-web/
 - **체력 개념 없음** — 미스해도 곡은 끝까지 진행
 - 한 칸에 팡이가 여러 마리면 **링도 마리 수만큼** 차례로 닫힘 → 순서대로 연달아 터치
 - 콤보 보너스 + 정확도 등급(S/A/B/C/D), 최종 점수가 **곡별 랭킹**에 반영
-- 게임 중 **⏸ 일시정지**(계속하기/처음부터/나가기), 홈에서 **🚪 로비로 돌아가기** 가능
+- 게임 중 **⏸ 일시정지**(계속하기/처음부터/나가기), 홈에서 **🏠 로비로 돌아가기** 가능
 
 ### 곡 목록
 곡마다 실제 음원의 BPM을 분석해 그 곡의 리듬(그루브)에 맞춘 전용 채보 패턴이 고정 적용됩니다.
 
 | 곡 | 난이도 | BPM | 리듬 패턴 |
 |---|---|---|---|
-| 🎷 재즈 스텝 | 쉬움 ★☆☆ | 95.7 | `walk` — 2박마다 한 걸음씩 단타 (연타 없음) |
 | 🎹 셋의 스윙 | 보통 ★★☆ | 86.1 | `triplet` — 2박을 3등분한 트리플렛(3연음) |
 | 🎺 스윙 버튼 | 어려움 ★★★ | 152.0 | `swingEighth` — 매 박 스윙 8비트 + 잦은 연타 |
-| 🎶 팡이 비트 | 연습 | 120 | WebAudio 즉석 생성(파일 불필요), 구버전 랜덤 채보 |
 
 BPM·오프셋은 `tools/analyze_bpm.py`로 실측(ffmpeg 변환 → numpy 온셋 자기상관 분석)한 값입니다. 자세한 곡 추가 방법은 [public/songs/README.md](public/songs/README.md) 참고.
 
-- **실제 음원 즉석 불러오기**: 메인 화면 **＋내 MP3** 버튼으로 내 음악 선택(BPM 직접 입력) → 바로 플레이. 개인 연습용(랭킹 미반영)
 - 랭킹 키는 곡별로 분리됩니다: `rhythm:<곡id>:<난이도>`
 
 ## 랭킹 저장 방식
@@ -75,7 +72,7 @@ node server.js
 
 ## 커스터마이징 포인트
 - 판정 윈도우/점수: `public/index.html` 상단 `W_PERFECT`, `W_GOOD`, `SCORE`
-- 곡별 채보 패턴: `chartWalk`/`chartTriplet`/`chartSwingEighth` (홀 간격, 연타 확률 등). 팡이 비트·내 MP3용 구버전 랜덤 생성기는 `chartLegacy`/`LEGACY_DIFF`
+- 곡별 채보 패턴: `chartWalk`/`chartTriplet`/`chartSwingEighth` (홀 간격, 연타 확률 등)
 - 포트 변경(서버 사용 시): `set PORT=8080 && node server.js`
 - 닉네임 중복: 같은 닉네임 = 같은 플레이어(최고점 갱신). 분리하려면 비밀번호/세션 추가 필요.
 
