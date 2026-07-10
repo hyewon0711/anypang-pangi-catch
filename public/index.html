@@ -6,9 +6,27 @@
 <title>팡이 리듬! 🎵</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
-  :root{--bg1:#1b2b4d;--gold:#ffce4a;--gold2:#ff9d2e;--green:#46d17e;--panel:#26346a;--panel2:#141f3f;--muted:#a8b8e6;--ink:#10182f;--pink:#ff6fa5;--cyan:#46d1d1;}
+  /* ===== 테마 (기본: 밝은 버전) ===== */
+  :root{
+    --gold:#ffce4a;--gold2:#ff9d2e;--green:#46d17e;--pink:#ff6fa5;--cyan:#46d1d1;--ink:#10182f;
+    --gold-text:#b06a12;--green-text:#1f8a4d;--pink-text:#b83a83;--cyan-text:#0e8e8e;
+    --page-grad:linear-gradient(135deg,#f2e9fb 0%,#fbe3f0 28%,#ffe4dd 55%,#ffedd3 78%,#fdf7d8 100%);
+    --text:#3a2b52;--muted:#8a7fa0;
+    --panel:#fffdfc;--panel2:#faf3fb;--hairline:rgba(132,94,194,.18);
+    --card-grad:linear-gradient(180deg,#ffffff,#fbf0f7);
+    --chip-sel-grad:linear-gradient(180deg,#f3e3fb,#ffd9ec);
+    --game-panel:#141f3f;--game-muted:#a8b8e6; /* 게임 화면은 테마와 무관하게 항상 어두운 보드 */
+  }
+  [data-theme="dark"]{
+    --gold-text:#ffce4a;--green-text:#46d17e;--pink-text:#ff6fa5;--cyan-text:#46d1d1;
+    --page-grad:radial-gradient(circle at 50% 0%,#3a4a99,#1b2b4d 60%,#0e1430);
+    --text:#fff;--muted:#a8b8e6;
+    --panel:#26346a;--panel2:#141f3f;--hairline:rgba(255,255,255,.12);
+    --card-grad:linear-gradient(180deg,#2d3d7a,#1a2750);
+    --chip-sel-grad:linear-gradient(180deg,#3a4a8a,#26346a);
+  }
   html,body{height:100%;}
-  body{background:radial-gradient(circle at 50% 0%,#3a4a99,var(--bg1) 60%,#0e1430);display:flex;align-items:center;justify-content:center;min-height:100vh;color:#fff;overflow:hidden;}
+  body{background:var(--page-grad);display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--text);overflow:hidden;}
   .app{width:min(960px,100vw,177.78vh);aspect-ratio:16/9;position:relative;display:flex;flex-direction:column;overflow:hidden;}
   .screen{position:absolute;inset:0;display:flex;flex-direction:column;}
   .hidden{display:none!important;}
@@ -16,7 +34,7 @@
   .btn:active{transform:translateY(3px);}
   .btn.primary{background:linear-gradient(180deg,#7be3a1,var(--green));color:#0a3a1f;box-shadow:0 5px 0 #2c9c58;}
   .btn.gold{background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);box-shadow:0 4px 0 #b86a12;}
-  .btn.ghost{background:var(--panel);color:#fff;border:1px solid rgba(255,255,255,.2);}
+  .btn.ghost{background:var(--panel);color:var(--text);border:1px solid var(--hairline);}
   .btn:active{box-shadow:none;}
 
   /* ===== 로비 ===== */
@@ -34,15 +52,16 @@
   .demo-dot .e{position:absolute;top:34%;width:10px;height:12px;background:#fff;border-radius:50%;}
   .demo-dot .e.l{left:26%}.demo-dot .e.r{right:26%}
   .demo-dot .e::after{content:'';position:absolute;top:32%;left:28%;width:4px;height:5px;background:#111;border-radius:50%;}
-  .nick-input{width:100%;max-width:320px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;font-size:17px;text-align:center;font-weight:700;margin-bottom:14px;}
+  .nick-input{width:100%;max-width:320px;padding:15px;border-radius:14px;border:2px solid var(--hairline);background:var(--panel2);color:var(--text);font-size:17px;text-align:center;font-weight:700;margin-bottom:14px;}
   .nick-input:focus{outline:none;border-color:var(--gold);}
 
   /* ===== 헤더 ===== */
   .topbar{padding:14px 16px 4px;display:flex;align-items:center;justify-content:space-between;}
   .title{font-size:19px;font-weight:900;text-shadow:0 3px 0 #2d4d9c;display:flex;gap:6px;align-items:center;}
   .me-chip{background:var(--panel2);padding:6px 12px;border-radius:20px;font-size:12px;color:var(--muted);}
-  .me-chip b{color:#fff;}
+  .me-chip b{color:var(--text);}
   .help-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(180deg,#ffe89a,var(--gold2));color:var(--ink);font-weight:900;font-size:17px;box-shadow:0 3px 0 #b86a12;}
+  .theme-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--hairline);cursor:pointer;background:var(--panel);color:var(--text);font-size:15px;display:flex;align-items:center;justify-content:center;}
 
   /* ===== 홈 (16:9, 스크롤 없이 한 화면) ===== */
   .home-main{flex:1;display:flex;gap:14px;padding:0 16px 14px;min-height:0;}
@@ -51,35 +70,35 @@
   /* ===== 선택 UI (곡) ===== */
   .sel-label{font-size:11px;color:var(--muted);font-weight:700;margin:0 2px 5px;}
   .song-chips{display:flex;gap:8px;flex-wrap:wrap;}
-  .chip{flex:0 0 auto;min-width:82px;background:var(--panel);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;text-align:center;cursor:pointer;transition:.12s;}
-  .chip.sel{border-color:var(--gold);background:linear-gradient(180deg,#3a4a8a,#26346a);box-shadow:0 0 12px rgba(255,206,74,.35);}
+  .chip{flex:0 0 auto;min-width:82px;background:var(--panel);border:2px solid var(--hairline);border-radius:12px;padding:8px 10px;text-align:center;cursor:pointer;transition:.12s;color:var(--text);}
+  .chip.sel{border-color:var(--gold);background:var(--chip-sel-grad);box-shadow:0 0 12px rgba(255,206,74,.35);}
   .chip .c{font-size:22px;line-height:1;}
   .chip .n{font-size:11px;font-weight:700;margin-top:3px;white-space:nowrap;}
 
   /* ===== 홈 점수 ===== */
-  .home-best{background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:14px;padding:10px 14px;font-size:13px;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:2px;}
-  .home-best .sel-info{color:#fff;font-weight:800;}
+  .home-best{background:var(--card-grad);border-radius:14px;padding:10px 14px;font-size:13px;border:1px solid var(--hairline);display:flex;flex-direction:column;gap:2px;}
+  .home-best .sel-info{color:var(--text);font-weight:800;}
   .home-best .best-info{color:var(--muted);}
-  .home-best .best-info b{color:var(--gold);font-size:16px;}
-  .help-panel{flex:1;background:var(--panel2);border-radius:16px;border:1px solid rgba(255,255,255,.08);min-height:0;padding:10px 14px;display:flex;flex-direction:column;}
-  .help-panel-head{font-size:13px;font-weight:800;color:var(--gold);margin-bottom:8px;flex-shrink:0;}
+  .home-best .best-info b{color:var(--gold-text);font-size:16px;}
+  .help-panel{flex:1;background:var(--panel2);border-radius:16px;border:1px solid var(--hairline);min-height:0;padding:10px 14px;display:flex;flex-direction:column;}
+  .help-panel-head{font-size:13px;font-weight:800;color:var(--gold-text);margin-bottom:8px;flex-shrink:0;}
   .help-grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;min-height:0;}
   .play-area{margin-top:auto;display:flex;gap:8px;}
   .play-btn{flex:1;padding:14px;border:none;border-radius:16px;cursor:pointer;background:linear-gradient(180deg,#ffd76b,var(--gold2));color:var(--ink);font-size:16px;font-weight:900;box-shadow:0 5px 0 #b86a12;}
   .play-btn:active{transform:translateY(4px);box-shadow:none;}
-  .refresh-btn{width:46px;border:none;border-radius:16px;background:var(--panel);color:#fff;font-size:18px;cursor:pointer;box-shadow:0 5px 0 #0c1430;}
+  .refresh-btn{width:46px;border:none;border-radius:16px;background:var(--panel);color:var(--text);font-size:18px;cursor:pointer;box-shadow:0 5px 0 #0c1430;}
   .refresh-btn:active{transform:translateY(4px);box-shadow:none;}
 
-  /* ===== 게임 ===== */
-  #game{background:radial-gradient(circle at 50% 25%,#2a3a6e,#0e1430);}
+  /* ===== 게임 (테마와 무관하게 항상 어두운 보드) ===== */
+  #game{background:radial-gradient(circle at 50% 25%,#2a3a6e,#0e1430);color:#fff;}
   .game-hud{padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:flex-start;}
   .hud-l .score-big{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;}
-  .hud-l .acc{font-size:12px;color:var(--muted);margin-top:2px;}
-  .pause-btn{position:absolute;top:12px;right:14px;z-index:20;width:38px;height:38px;border-radius:10px;border:none;background:var(--panel2);color:#fff;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #0c1430;}
+  .hud-l .acc{font-size:12px;color:var(--game-muted);margin-top:2px;}
+  .pause-btn{position:absolute;top:12px;right:14px;z-index:20;width:38px;height:38px;border-radius:10px;border:none;background:var(--game-panel);color:#fff;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #0c1430;}
   .pause-btn:active{transform:translateY(2px);box-shadow:none;}
-  .progress{height:6px;margin:6px 16px 0;background:var(--panel2);border-radius:4px;overflow:hidden;}
+  .progress{height:6px;margin:6px 16px 0;background:var(--game-panel);border-radius:4px;overflow:hidden;}
   .progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .1s linear;}
-  .song-name-mini{text-align:center;font-size:12px;color:var(--muted);margin-top:6px;}
+  .song-name-mini{text-align:center;font-size:12px;color:var(--game-muted);margin-top:6px;}
 
   .grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 10px;min-height:0;}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:min(8vh,40px) 40px;width:min(300px,90%);}
@@ -113,28 +132,28 @@
 
   /* 모달 */
   .overlay{position:absolute;inset:0;background:rgba(8,12,30,.85);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:40;padding:20px;}
-  .modal{width:100%;max-width:340px;background:linear-gradient(180deg,#2d3d7a,#1a2750);border-radius:22px;padding:22px;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 50px rgba(0,0,0,.6);}
-  .modal h2{text-align:center;font-size:20px;margin-bottom:14px;color:var(--gold);}
-  .res-score{text-align:center;font-size:40px;font-weight:900;color:var(--gold);}
+  .modal{width:100%;max-width:340px;background:var(--card-grad);border-radius:22px;padding:22px;border:1px solid var(--hairline);box-shadow:0 20px 50px rgba(0,0,0,.6);color:var(--text);}
+  .modal h2{text-align:center;font-size:20px;margin-bottom:14px;color:var(--gold-text);}
+  .res-score{text-align:center;font-size:40px;font-weight:900;color:var(--gold-text);}
   .res-grade{text-align:center;font-size:54px;font-weight:900;margin:4px 0;}
   .res-stats{display:flex;justify-content:space-around;background:var(--panel2);border-radius:12px;padding:12px;margin:12px 0;}
   .res-stats .st{text-align:center;font-size:11px;color:var(--muted);}
   .res-stats .st b{display:block;font-size:18px;margin-top:2px;}
-  .res-stats .st.g b{color:var(--cyan)}.res-stats .st.m b{color:var(--pink)}
+  .res-stats .st.g b{color:var(--cyan-text)}.res-stats .st.m b{color:var(--pink-text)}
   .res-rank{text-align:center;font-size:14px;margin-bottom:12px;}
-  .res-rank b{color:var(--gold);font-size:20px;}
-  .new-best{text-align:center;color:var(--green);font-weight:900;font-size:14px;margin-bottom:6px;animation:pulse 1s infinite;}
+  .res-rank b{color:var(--gold-text);font-size:20px;}
+  .new-best{text-align:center;color:var(--green-text);font-weight:900;font-size:14px;margin-bottom:6px;animation:pulse 1s infinite;}
   @keyframes pulse{50%{opacity:.5}}
   .btn-row{display:flex;gap:10px;margin-top:6px;}
   .btn-row .btn{flex:1;}
-  .fld{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:8px 0;color:#e6ecff;}
-  .fld input{width:110px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:var(--panel2);color:#fff;text-align:center;font-size:14px;}
+  .fld{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:8px 0;color:var(--text);}
+  .fld input{width:110px;padding:8px;border-radius:8px;border:1px solid var(--hairline);background:var(--panel2);color:var(--text);text-align:center;font-size:14px;}
   .help-step{display:flex;flex-direction:column;min-height:0;min-width:0;}
   .help-shot{width:100%;flex:1 1 auto;min-height:0;display:block;border-radius:8px;margin-bottom:6px;}
   .step-row{display:flex;gap:6px;align-items:flex-start;flex-shrink:0;}
   .step-row .n{width:17px;height:17px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:10px;}
-  .step-row .txt{font-size:10.5px;line-height:1.35;color:#e6ecff;}
-  .step-row .txt b{color:var(--gold);}
+  .step-row .txt{font-size:10.5px;line-height:1.35;color:var(--text);}
+  .step-row .txt b{color:var(--gold-text);}
   .toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:10px 18px;border-radius:20px;font-size:13px;z-index:60;opacity:0;transition:.3s;white-space:nowrap;}
   .toast.show{opacity:1;}
 </style>
@@ -144,6 +163,7 @@
 
   <!-- ===== 로비 ===== -->
   <div class="screen" id="lobby">
+    <button class="theme-btn" id="themeBtnLobby" onclick="toggleTheme()" title="어두운 화면으로 전환" style="position:absolute;top:14px;right:16px;">🌙</button>
     <div class="logo">🎵 팡이 리듬<span class="note">♪</span></div>
     <div class="sub">노래 박자에 맞춰 팡이를 터치하세요</div>
     <div class="pangi-demo">
@@ -162,6 +182,7 @@
       <div style="display:flex;gap:8px;align-items:center;">
         <button class="help-btn" onclick="backToLobby()" title="로비로 돌아가기">🏠</button>
         <span class="me-chip">👤 <b id="meNick">-</b></span>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="어두운 화면으로 전환">🌙</button>
       </div>
     </div>
 
@@ -209,10 +230,10 @@
           <text x="80" y="35" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">3</text>
           <path d="M140 34 L140 66 L147 59 L152 71 L157 69 L152 57 L162 57 Z" fill="#fff" stroke="#10182f" stroke-width="1.5" stroke-linejoin="round"/>
           <g font-size="12" font-weight="800" text-anchor="middle">
-            <rect x="182" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="39" fill="#fff">E</text>
-            <rect x="206" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="39" fill="#fff">O</text>
-            <rect x="182" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="63" fill="#fff">F</text>
-            <rect x="206" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="63" fill="#fff">K</text>
+            <rect x="182" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="39" fill="var(--text)">E</text>
+            <rect x="206" y="24" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="39" fill="var(--text)">O</text>
+            <rect x="182" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="192" y="63" fill="var(--text)">F</text>
+            <rect x="206" y="48" width="20" height="20" rx="5" fill="var(--panel)" stroke="var(--muted)"/><text x="216" y="63" fill="var(--text)">K</text>
           </g>
           <text x="120" y="104" text-anchor="middle" font-size="12" fill="var(--muted)">칸 위 숫자가 남은 시간!</text>
         </svg>
@@ -222,15 +243,15 @@
       <div class="help-step">
         <svg class="help-shot" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
           <rect width="240" height="120" rx="12" fill="var(--panel2)"/>
-          <line x1="120" y1="14" x2="120" y2="106" stroke="rgba(255,255,255,.15)"/>
+          <line x1="120" y1="14" x2="120" y2="106" stroke="var(--hairline)"/>
           <circle cx="62" cy="58" r="28" fill="#0a1228"/>
           <path d="M50 46 L74 70 M74 46 L50 70" stroke="var(--pink)" stroke-width="4" stroke-linecap="round"/>
-          <text x="62" y="102" text-anchor="middle" font-size="13" font-weight="800" fill="var(--pink)">MISS</text>
+          <text x="62" y="102" text-anchor="middle" font-size="13" font-weight="800" fill="var(--pink-text)">MISS</text>
           <circle cx="178" cy="58" r="28" fill="#0a1228"/>
           <path d="M166 58 L175 67 L192 48" fill="none" stroke="var(--cyan)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-          <text x="178" y="102" text-anchor="middle" font-size="13" font-weight="800" fill="var(--cyan)">GOOD</text>
+          <text x="178" y="102" text-anchor="middle" font-size="13" font-weight="800" fill="var(--cyan-text)">GOOD</text>
         </svg>
-        <div class="step-row"><div class="n">3</div><div class="txt">3초 안에 누르면 <b style="color:#46d1d1">GOOD</b>, 시간 안에 못 누르면 <b style="color:#ff6fa5">MISS</b>!</div></div>
+        <div class="step-row"><div class="n">3</div><div class="txt">3초 안에 누르면 <b style="color:var(--cyan-text)">GOOD</b>, 시간 안에 못 누르면 <b style="color:var(--pink-text)">MISS</b>!</div></div>
       </div>
 
       <div class="help-step">
@@ -258,8 +279,8 @@
             <rect x="45" y="48" width="10" height="14" fill="var(--gold)"/>
             <rect x="30" y="62" width="40" height="8" rx="3" fill="var(--gold)"/>
           </g>
-          <text x="180" y="70" text-anchor="middle" font-size="26" font-weight="900" fill="var(--gold)">S</text>
-          <text x="180" y="94" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">최고점 도전!</text>
+          <text x="180" y="70" text-anchor="middle" font-size="26" font-weight="900" fill="var(--gold-text)">S</text>
+          <text x="180" y="94" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">최고점 도전!</text>
         </svg>
         <div class="step-row"><div class="n">5</div><div class="txt">최종 점수와 등급(S~D)이 <b>랭킹</b>에 반영돼요. 최고 점수에 도전해보세요!</div></div>
       </div>
@@ -291,6 +312,22 @@
 let me = { nickname:'' };
 const REACT_WINDOW = 2.5;       // 팡이 등장 후 반응 제한시간(s) — 이 안에 다 누르면 GOOD, 넘기면 MISS
 const SCORE_GOOD = 100;
+
+/* ===== 테마(밝음/어두움) ===== */
+function applyTheme(theme){
+  if(theme==='dark'){ document.documentElement.setAttribute('data-theme','dark'); }
+  else{ document.documentElement.removeAttribute('data-theme'); theme='light'; }
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    b.textContent = theme==='dark' ? '☀️' : '🌙';
+    b.title = theme==='dark' ? '밝은 화면으로 전환' : '어두운 화면으로 전환';
+  });
+  localStorage.setItem('pangi_theme', theme);
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'light';
+  applyTheme(cur==='dark' ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem('pangi_theme') || 'light');
 
 /* ------------------------------------------------------------------------
    곡 목록 — 실제 음원(mp3) 1곡, BPM/오프셋에 맞춰 리듬 패턴(chart 타입)이
@@ -328,12 +365,14 @@ function chartSwingEighth(lengthBeats){
   const chart=[]; const pickHole=pickHoleFactory(1.2); let seed=300;
   for(let b=4; b<=lengthBeats-2; b+=1.2){
     seed++;
-    const c1 = hash01(seed*5.1)<0.2 ? (hash01(seed*7.3)<0.25 ? 3 : 2) : 1;
+    const r1 = hash01(seed*5.1);
+    const c1 = r1<0.22 ? 1 : r1<0.52 ? 2 : r1<0.8 ? 3 : 4;
     chart.push({ b, h:pickHole(b, seed*1.7), c:c1 });
     if(hash01(seed*11.3) < 0.32){
       seed++;
       const b2 = b + 0.6;
-      chart.push({ b:b2, h:pickHole(b2, seed*1.7), c:1 });
+      const c2 = hash01(seed*9.3)<0.2 ? 2 : 1;
+      chart.push({ b:b2, h:pickHole(b2, seed*1.7), c:c2 });
     }
   }
   return chart;
@@ -689,7 +728,7 @@ async function endSong(){
   const maxScore=totalTaps*SCORE_GOOD || 1;
   const acc=Math.min(100, score/maxScore*100);
   const grade = acc>=95?'S':acc>=85?'A':acc>=70?'B':acc>=50?'C':'D';
-  const gradeColor = {S:'#ffce4a',A:'#46d17e',B:'#46d1d1',C:'#a8b8e6',D:'#ff6fa5'}[grade];
+  const gradeColor = {S:'var(--gold-text)',A:'var(--green-text)',B:'var(--cyan-text)',C:'var(--muted)',D:'var(--pink-text)'}[grade];
   const ov=document.createElement('div'); ov.className='overlay'; ov.id='resOverlay';
   ov.innerHTML=`<div class="modal">
     <h2>🎉 결과</h2>
