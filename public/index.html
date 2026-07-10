@@ -75,7 +75,7 @@
   .home-best .best-info b{color:var(--gold-text);font-size:16px;}
   .help-panel{flex:1;background:var(--panel2);border-radius:18px;border:1px solid var(--hairline);min-height:0;padding:14px 20px;display:flex;flex-direction:column;}
   .help-panel-head{font-size:14px;font-weight:800;color:var(--gold-text);margin-bottom:10px;flex-shrink:0;}
-  .help-grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;min-height:0;}
+  .help-grid{flex:1;display:grid;grid-template-columns:1fr;grid-template-rows:repeat(5,1fr);gap:6px;min-height:0;}
   .play-area{margin-top:auto;display:flex;gap:8px;}
   .play-btn{flex:1;padding:15px;border:none;border-radius:16px;cursor:pointer;font-family:'Jua',sans-serif;background:linear-gradient(180deg, oklch(84% 0.11 60), oklch(72% 0.15 45));color:oklch(22% 0.05 40);font-size:16px;box-shadow:0 5px 0 oklch(50% 0.12 40);}
   .play-btn:active{transform:translateY(4px);box-shadow:none;}
@@ -148,9 +148,9 @@
   .btn-row .btn{flex:1;}
   .fld{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:8px 0;color:var(--text);}
   .fld input{width:110px;padding:8px;border-radius:8px;border:1px solid var(--hairline);background:var(--panel2);color:var(--text);text-align:center;font-size:14px;font-family:inherit;}
-  .help-step{display:flex;flex-direction:column;min-height:0;min-width:0;}
-  .help-shot{width:100%;flex:1 1 auto;min-height:0;display:block;border-radius:10px;margin-bottom:6px;}
-  .step-row{display:flex;gap:10px;align-items:flex-start;flex-shrink:0;}
+  .help-step{display:flex;flex-direction:row;align-items:center;gap:12px;min-height:0;min-width:0;}
+  .help-shot{height:100%;width:auto;flex:0 0 auto;display:block;border-radius:10px;}
+  .step-row{display:flex;gap:8px;align-items:center;flex:1;min-width:0;}
   .step-row .n{width:20px;height:20px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:11px;}
   .step-row .txt{font-size:11.5px;line-height:1.4;color:var(--text);}
   .step-row .txt b{color:var(--gold-text);}
@@ -298,7 +298,7 @@
 let me = { nickname:'' };
 const REACT_WINDOW = 2.5;       // 팡이 등장 후 반응 제한시간(s) — 이 안에 다 누르면 GOOD, 넘기면 MISS
 const SCORE_GOOD = 100;
-const GAME_DURATION = 60;       // 한 판 게임 시간(s) — 지나면 자동으로 결과 팝업
+const GAME_DURATION = 30;       // 한 판 게임 시간(s) — 지나면 자동으로 결과 팝업
 function fmtTime(s){ s=Math.max(0,Math.ceil(s)); const m=Math.floor(s/60), sec=s%60; return m+':'+String(sec).padStart(2,'0'); }
 
 /* ===== 테마(밝음/어두움) ===== */
