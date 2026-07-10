@@ -47,23 +47,6 @@
   .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--hairline);font-family:inherit;font-weight:700;}
   .btn:active{box-shadow:none;}
 
-  /* ===== 로비 ===== */
-  #lobby{align-items:center;justify-content:center;padding:24px;text-align:center;}
-  .logo{font-family:'Jua',sans-serif;font-size:40px;color:var(--gold-text);text-shadow:var(--title-shadow);margin-bottom:6px;letter-spacing:.5px;}
-  .logo .note{display:inline-block;animation:bounce 1s ease-in-out infinite;}
-  @keyframes bounce{50%{transform:translateY(-8px)}}
-  .sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
-  .pangi-demo{display:flex;gap:16px;margin-bottom:28px;}
-  .demo-dot{width:52px;height:52px;border-radius:50%;position:relative;animation:wob 1.6s ease-in-out infinite;}
-  .demo-dot:nth-child(2){animation-delay:.2s}.demo-dot:nth-child(3){animation-delay:.4s}
-  .demo-dot.white{background:radial-gradient(circle at 38% 30%,#fff,oklch(90% 0.02 45) 75%,oklch(82% 0.03 50));}
-  .demo-dot.black{background:radial-gradient(circle at 38% 30%,oklch(55% 0.08 50),oklch(35% 0.06 45) 75%,oklch(24% 0.04 40));}
-  .demo-dot.gold{background:radial-gradient(circle at 38% 30%,oklch(93% 0.06 85),oklch(80% 0.15 85) 60%,oklch(66% 0.15 60));box-shadow:0 0 14px oklch(80% 0.15 85 / .55);}
-  .demo-dot .e{position:absolute;top:32%;width:11px;height:13px;background:#fff;border-radius:50%;}
-  .demo-dot .e.l{left:24%}.demo-dot .e.r{right:24%}
-  .demo-dot .e::after{content:'';position:absolute;top:32%;left:26%;width:4.5px;height:5.5px;background:var(--ink);border-radius:50%;}
-  .nick-input{width:100%;max-width:320px;padding:15px;border-radius:16px;border:2px solid var(--hairline);background:var(--panel);color:var(--text);font-size:17px;text-align:center;font-weight:700;margin-bottom:16px;font-family:inherit;}
-  .nick-input:focus{outline:none;border-color:var(--gold);}
 
   /* ===== 헤더 ===== */
   .topbar{padding:14px 18px 4px;display:flex;align-items:center;justify-content:space-between;}
@@ -178,26 +161,11 @@
 <body>
 <div class="app">
 
-  <!-- ===== 로비 ===== -->
-  <div class="screen" id="lobby">
-    <button class="theme-btn" id="themeBtnLobby" onclick="toggleTheme()" title="어두운 화면으로 전환" style="position:absolute;top:14px;right:16px;">🌙</button>
-    <div class="logo">🎵 팡이 리듬<span class="note">♪</span></div>
-    <div class="sub">노래 박자에 맞춰 팡이를 터치하세요</div>
-    <div class="pangi-demo">
-      <div class="demo-dot white"><div class="e l"></div><div class="e r"></div></div>
-      <div class="demo-dot black"><div class="e l"></div><div class="e r"></div></div>
-      <div class="demo-dot gold"><div class="e l"></div><div class="e r"></div></div>
-    </div>
-    <input class="nick-input" id="nickInput" maxlength="12" placeholder="닉네임을 입력하세요" autocomplete="off">
-    <button class="btn primary" style="width:100%;max-width:320px;" onclick="enter()">입장하기 ▶</button>
-  </div>
-
-  <!-- ===== 홈 ===== -->
-  <div class="screen hidden" id="home">
+  <!-- ===== 홈(플레이 방법) — 첫 시작 화면 ===== -->
+  <div class="screen" id="home">
     <div class="topbar">
       <div class="title">🎵 팡이 리듬</div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="help-btn" onclick="backToLobby()" title="로비로 돌아가기">🏠</button>
         <span class="me-chip">👤 <b id="meNick">-</b></span>
         <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="어두운 화면으로 전환">🌙</button>
       </div>
@@ -471,23 +439,15 @@ function ensureBuffer(song){
 /* ========================================================================
    입장 / 선택 UI / 랭킹
 ======================================================================== */
-function enter(){
-  const v=document.getElementById('nickInput').value.trim();
-  if(!v){ toast('닉네임을 입력해주세요'); return; }
-  me.nickname=v; document.getElementById('meNick').textContent=v;
-  localStorage.setItem('pangi_nick',v);
-  document.getElementById('lobby').classList.add('hidden');
-  document.getElementById('home').classList.remove('hidden');
+function initApp(){
+  let nick = localStorage.getItem('pangi_nick');
+  if(!nick){ nick = '손님'+Math.floor(1000+Math.random()*9000); localStorage.setItem('pangi_nick', nick); }
+  me.nickname = nick;
+  document.getElementById('meNick').textContent = nick;
   renderSongChips(); updateSelInfo(); loadLeaderboard();
   ensureBuffer(curSong).catch(()=>{}); // 미리 받아두기(플레이 시작 대기시간 줄이기)
 }
-function backToLobby(){
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('lobby').classList.remove('hidden');
-  document.getElementById('nickInput').value = me.nickname || '';
-}
-document.getElementById('nickInput').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
-const saved=localStorage.getItem('pangi_nick'); if(saved) document.getElementById('nickInput').value=saved;
+initApp();
 
 function renderSongChips(){
   const el=document.getElementById('songChips');
